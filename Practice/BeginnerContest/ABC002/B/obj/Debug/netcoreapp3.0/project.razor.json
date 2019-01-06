@@ -1,0 +1,14 @@
+{
+  "ProjectFilePath": "d:\\WorkSpace\\csharp\\AtCorder\\Practice\\BeginnerContest\\ABC002\\B\\B.csproj",
+  "TargetFramework": "netcoreapp3.0",
+  "TagHelpers": [],
+  "Configuration": {
+    "ConfigurationName": "UnsupportedRazor",
+    "LanguageVersion": "1.0",
+    "Extensions": [
+      {
+        "ExtensionName": "UnsupportedRazorExtension"
+      }
+    ]
+  }
+}
