@@ -1,0 +1,12 @@
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\bin\Debug\netcoreapp3.0\C.exe
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\bin\Debug\netcoreapp3.0\C.deps.json
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\bin\Debug\netcoreapp3.0\C.runtimeconfig.json
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\bin\Debug\netcoreapp3.0\C.runtimeconfig.dev.json
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\bin\Debug\netcoreapp3.0\C.dll
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\bin\Debug\netcoreapp3.0\C.pdb
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\obj\Debug\netcoreapp3.0\C.csprojAssemblyReference.cache
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\obj\Debug\netcoreapp3.0\C.csproj.CoreCompileInputs.cache
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\obj\Debug\netcoreapp3.0\C.AssemblyInfoInputs.cache
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\obj\Debug\netcoreapp3.0\C.AssemblyInfo.cs
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\obj\Debug\netcoreapp3.0\C.dll
+D:\WorkSpace\csharp\AtCorder\Practice\BeginnerContest\ABC011\c\obj\Debug\netcoreapp3.0\C.pdb
