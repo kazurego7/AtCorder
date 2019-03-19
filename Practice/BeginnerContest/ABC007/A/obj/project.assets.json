@@ -1437,24 +1437,22 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\WorkSpace\\csharp\\AtCorder\\Practice\\BeginnerContest\\ABC007\\A\\A.csproj",
+      "projectUniqueName": "d:\\WorkSpace\\csharp\\AtCorder\\Practice\\BeginnerContest\\ABC007\\A\\A.csproj",
       "projectName": "A",
-      "projectPath": "D:\\WorkSpace\\csharp\\AtCorder\\Practice\\BeginnerContest\\ABC007\\A\\A.csproj",
+      "projectPath": "d:\\WorkSpace\\csharp\\AtCorder\\Practice\\BeginnerContest\\ABC007\\A\\A.csproj",
       "packagesPath": "C:\\Users\\kazuki_wada\\.nuget\\packages\\",
-      "outputPath": "D:\\WorkSpace\\csharp\\AtCorder\\Practice\\BeginnerContest\\ABC007\\A\\obj\\",
+      "outputPath": "d:\\WorkSpace\\csharp\\AtCorder\\Practice\\BeginnerContest\\ABC007\\A\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\kazuki_wada\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\kazuki_wada\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {},
         "https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json": {}
       },
