@@ -4,7 +4,15 @@ using System.Linq;
 
 namespace AtCoderTemplate {
     class Program {
-        static void Main (string[] args) { }
+        static void Main (string[] args) {
+            var AxAyBxBy = ReadInts ();
+            var A = AxAyBxBy.Take (2).ToList ();
+            var B = AxAyBxBy.Skip (2).ToList ();
+            var N = ReadInt ();
+            var XY = ReadSequence (N);
+            var X = XY[0];
+            var Y = XY[1];
+        }
         static int ReadInt () {
             return int.Parse (Console.ReadLine ());
         }
