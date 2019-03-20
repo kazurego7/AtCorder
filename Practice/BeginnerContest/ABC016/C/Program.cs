@@ -8,11 +8,24 @@ namespace AtCoderTemplate {
             var NM = ReadInts ();
             var N = NM[0];
             var M = NM[1];
+
+            if (M == 0) {
+                PrintList (Enumerable.Repeat (0, N));
+                return;
+            }
+
             var AB = ReadSequence (M);
             var A = AB[0];
             var B = AB[1];
-            PrintList (A);
-            PrintList (B);
+
+            var friends = Enumerable.Range (0, N + 1).Select (i => new List<int> ()).ToList ();
+            foreach (var i in Enumerable.Range (0, M)) {
+                friends[A[i]].Add (B[i]);
+                friends[B[i]].Add (A[i]);
+            }
+            var firiendConnections = Enumerable.Range (0, N + 1).Select (i => friends[i].SelectMany (k => friends[k]).Distinct ()).ToList ();
+            var overFriendCounts = Enumerable.Range (0, N + 1).Select (i => firiendConnections[i].Except (friends[i]).Where (overfriend => overfriend != i).Count ());
+            PrintList (overFriendCounts.Skip (1));
         }
         static int ReadInt () {
             return int.Parse (Console.ReadLine ());
