@@ -9,6 +9,23 @@ namespace AtCoderTemplate {
             var N = NM[0];
             var M = NM[1];
             var f = ReadSequence (N) [0];
+
+            var dp = new long[N + 1];
+            dp[0] = 1;
+            foreach (var i in Enumerable.Range (1, N)) {
+                var j = 0;
+                foreach (var k in Enumerable.Range (0, i)) {
+                    var range = f.Take (i).Skip (k);
+                    if (range.Distinct ().Count () == range.Count ()) {
+                        j = k;
+                        break;
+                    }
+                }
+                // Console.WriteLine ($"j : {j}");
+                dp[i] = dp.Take (i).Skip (j).Sum ();
+            }
+
+            Console.WriteLine (dp[N] % 1000000007L);
         }
         static int ReadInt () {
             return int.Parse (Console.ReadLine ());
