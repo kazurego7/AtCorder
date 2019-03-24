@@ -4,7 +4,20 @@ using System.Linq;
 
 namespace AtCoderTemplate {
     class Program {
-        static void Main (string[] args) { }
+        static void Main (string[] args) {
+            var S = Console.ReadLine ();
+            var N = ReadInt ();
+            var lr = ReadSequence (N);
+            var l = lr[0];
+            var r = lr[1];
+            foreach (var i in Enumerable.Range (0, N)) {
+                var left = S.Take (l[i] - 1);
+                var right = S.Skip (r[i]);
+                var middle = S.Take (r[i]).Skip (l[i] - 1);
+                S = string.Concat (left.Concat (middle.Reverse ()).Concat (right));
+            }
+            Console.WriteLine (S);
+        }
         static int ReadInt () {
             return int.Parse (Console.ReadLine ());
         }

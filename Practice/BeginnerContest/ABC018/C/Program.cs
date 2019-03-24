@@ -4,7 +4,13 @@ using System.Linq;
 
 namespace AtCoderTemplate {
     class Program {
-        static void Main (string[] args) { }
+        static void Main (string[] args) {
+            var RCK = ReadInts ();
+            var R = RCK[0];
+            var C = RCK[1];
+            var K = RCK[2];
+            var s = ReadSequence (R) [0];
+        }
         static int ReadInt () {
             return int.Parse (Console.ReadLine ());
         }
