@@ -9,7 +9,25 @@ namespace AtCoderTemplate {
             var R = RCK[0];
             var C = RCK[1];
             var K = RCK[2];
-            var s = ReadSequence (R) [0];
+            var s = Enumerable.Range (0, R).Select (i => Console.ReadLine ().ToList ()).ToList ();
+
+            var count = 0;
+            foreach (var y in Enumerable.Range (K, (R - 2 * K + 2))) {
+                foreach (var x in Enumerable.Range (K, (C - 2 * K + 2))) {
+                    // ひし形の判定
+                    // Console.WriteLine ($"{y}:{x}");
+                    var isDiamond = Enumerable.Range (y - K + 1, 2 * (K - 1) + 1)
+                        .All (j =>
+                            Enumerable.Range (x - K + 1, 2 * (K - 1) + 1)
+                            .Where (i => Math.Abs (i - x) + Math.Abs (j - y) <= K - 1)
+                            .All (i => s[j - 1][i - 1] == 'o')
+                        );
+                    if (isDiamond) {
+                        count++;
+                    }
+                }
+            }
+            Console.WriteLine (count);
         }
         static int ReadInt () {
             return int.Parse (Console.ReadLine ());
