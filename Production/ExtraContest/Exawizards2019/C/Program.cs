@@ -20,42 +20,8 @@ namespace AtCoderTemplate {
                 t[i] = td[0];
                 d[i] = td[2];
             }
-
-            var indexesDirectory = new Dictionary<char, IList<int>> ();
-            foreach (var c in Enumerable.Range ('A', 'Z' - 'A' + 1).Select (i => (char) i)) {
-                indexesDirectory.Add (c, new List<int> ());
-            }
-            foreach (var i in Enumerable.Range (0, N)) {
-                indexesDirectory[s[i]].Add (i);
-            }
-
-            var golems = Enumerable.Repeat (1, N).ToArray ();
-
-            foreach (var i in Enumerable.Range (0, Q)) {
-                var indexes = indexesDirectory[t[i]];
-                if (d[i] == 'L') {
-                    foreach (var index in indexes) {
-                        if (index == 0) {
-                            golems[index] = 0;
-                        } else {
-                            golems[index - 1] += golems[index];
-                            golems[index] = 0;
-                        }
-                    }
-                } else {
-                    foreach (var index in indexes.Reverse ()) {
-                        if (index == N - 1) {
-                            golems[index] = 0;
-                        } else {
-                            golems[index + 1] += golems[index];
-                            golems[index] = 0;
-                        }
-                    }
-                }
-            }
-
-            Console.WriteLine (golems.Sum ());
         }
+
     }
 
     static class MyInputOutputs {
