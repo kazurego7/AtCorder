@@ -10,16 +10,19 @@ namespace AtCoderTemplate {
     class Program {
         static void Main (string[] args) {
             var N = ReadInt ();
-            var xyh = ReadColumns (N);
+            var seq = Enumerable.Range (0, N).Select (i => Console.ReadLine ().Split (' ').Select (c => long.Parse (c)).ToList ()).ToList ();
+            var xyh = Enumerable.Range (0, seq.First ().Count ()).Select (i => seq.Select (items => items[i]).ToList ()).ToList ();
             var x = xyh[0];
             var y = xyh[1];
             var h = xyh[2];
+
+            var correct = new List<List<long>> ();
 
             foreach (var cy in Enumerable.Range (0, 101)) {
                 foreach (var cx in Enumerable.Range (0, 101)) {
                     var maybeIndex = Enumerable.Range (0, N).Where (i => h[i] != 0).First ();
                     var maybeH = h[maybeIndex] + Abs (x[maybeIndex] - cx) + Abs (y[maybeIndex] - cy);
-                    var isCorrect = Enumerable.Range (1, N - 1)
+                    var isCorrect = Enumerable.Range (0, N)
                         .All (i => h[i] == Max (maybeH - Abs (x[i] - cx) - Abs (y[i] - cy), 0));
                     if (isCorrect) {
                         Console.WriteLine ($"{cx} {cy} {maybeH}");
