@@ -8,7 +8,12 @@ using static AtCoderTemplate.MyNumericFunctions;
 
 namespace AtCoderTemplate {
     class Program {
-        static void Main (string[] args) { }
+        static void Main (string[] args) {
+            var N = ReadInt ();
+            var contests = Enumerable.Range (1, 9).Select (i => i * 100 + i * 10 + i);
+            var first = contests.Where (x => x >= N).First ();
+            Console.WriteLine (first);
+        }
     }
 
     static class MyInputOutputs {
