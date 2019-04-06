@@ -9,7 +9,33 @@ using static AtCoderTemplate.MyNumericFunctions;
 namespace AtCoderTemplate {
     class Program {
         static void Main (string[] args) {
-            Print2DArray (ReadIntColumns (0));
+            var S = Console.ReadLine ();
+            var T = Console.ReadLine ();
+
+            /*
+            解説より、入力例を試していくと、置き換えられる条件は
+            S[i] = S[j] => T[i] = T[j] ・・・ (1)
+            であること、また
+            S[i] ≠ S[j] => T[i] ≠ T[j] ・・・ (2)
+            であることがわかる
+
+            ここで、(2)の対偶をとると、
+            T[i] = T[j] => S[i] = S[j] ・・・ (2')
+
+            素朴に、a~zの各々について、例えばb = S[i]となるようなインデックスiを得て、(1)(2')を満たすことを確認すればよい。
+            高々O(|S|)で計算可能
+             */
+
+            var isYes = Enumerable.Range ('a', 'z' - 'a' + 1).Select (i => (char) i)
+                .All (c => {
+                    var TBecauseS = Enumerable.Range (0, S.Count ()).Where (i => S[i] == c).Select (i => T[i]);
+                    var SBecauseT = Enumerable.Range (0, T.Count ()).Where (i => T[i] == c).Select (i => S[i]);
+                    var prop1 = TBecauseS.IsEmpty () ? true : TBecauseS.All (Ti => Ti == TBecauseS.First ());
+                    var prop2 = SBecauseT.IsEmpty () ? true : SBecauseT.All (Si => Si == SBecauseT.First ());
+                    return prop1 && prop2;
+                });
+
+            PrintIf (isYes, "Yes", "No");
         }
     }
 
