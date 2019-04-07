@@ -9,12 +9,9 @@ using static AtCoderTemplate.MyNumericFunctions;
 namespace AtCoderTemplate {
     class Program {
         static void Main (string[] args) {
-            var aTOe = new List<int> ();
-            foreach (var i in Enumerable.Range (0, 5)) {
-                aTOe.Add (ReadInt ());
-            }
+            var aTOe = ReadIntColumns (5) [0];
             var k = ReadInt ();
-            PrintIf (aTOe.Last () - aTOe.First () <= k, "Yay!", ":(");
+            PrintIf (Enumerable.Range (0, 5).SelectMany (p => Enumerable.Range (0, 5).Select (q => Abs (aTOe[q] - aTOe[p]))).All (d => d <= k), "Yay!", ":(");
         }
     }
 

@@ -10,18 +10,15 @@ namespace AtCoderTemplate {
     class Program {
         static void Main (string[] args) {
             var AToE = ReadIntColumns (5) [0];
-            var minIndex = AToE.Select (t => t % 10).SortIndex ().Where (i => AToE[i] % 10 != 0);
-            // PrintRow (minIndex);
-            if (minIndex.IsEmpty ()) {
-                var other = AToE.Select (t => (int) Ceiling (t / 10.0) * 10);
-                Console.WriteLine (other.Sum ());
-            } else {
-                var last = AToE[minIndex.First ()];
-                AToE.RemoveAt (minIndex.First ());
-                var other = AToE.Select (t => (int) Ceiling (t / 10.0) * 10);
-                Console.WriteLine (last + other.Sum ());
-            }
+            Console.WriteLine (Go (AToE));
+        }
 
+        static int Go (IEnumerable<int> list) {
+            if (list.Count () == 1) {
+                return list.First ();
+            } else {
+                return list.Select ((t, i) => (int) Ceiling (t / 10.0) * 10 + Go (list.Take (i).Concat (list.Skip (i + 1)))).Min ();
+            }
         }
     }
 
