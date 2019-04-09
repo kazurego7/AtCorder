@@ -16,34 +16,14 @@ namespace AtCoderTemplate {
             foreach (var i in Enumerable.Range (0, H)) {
                 a.Add (Console.ReadLine ().ToList ());
             }
-            var result = GoCol (GoRow (a, H, 0), W, 0);
-            foreach (var row in result) {
-                Print (String.Concat (row));
-            }
+            var rows = Enumerable.Range (0, H).Where (h => a[h].Any (x => x == '#'));
+            var cols = Enumerable.Range (0, W).Where (w => Enumerable.Range (0, H).Any (h => a[h][w] == '#'));
 
-        }
-
-        static List<List<char>> GoRow (List<List<char>> a, int H, int h) {
-            if (h == H) {
-                return a;
-            } else if (a[h].All (x => x == '.')) {
-                a.RemoveAt (h);
-                return GoRow (a, H - 1, h);
-            } else {
-                return GoRow (a, H, h + 1);
-            }
-        }
-
-        static List<List<char>> GoCol (List<List<char>> a, int W, int w) {
-            if (w == W) {
-                return a;
-            } else if (Enumerable.Range (0, a.Count).All (h => a[h][w] == '.')) {
-                foreach (var h in Enumerable.Range (0, a.Count)) {
-                    a[h].RemoveAt (w);
+            foreach (var row in rows) {
+                foreach (var col in cols) {
+                    Console.Write (a[row][col]);
                 }
-                return GoCol (a, W - 1, w);
-            } else {
-                return GoCol (a, W, w + 1);
+                Console.Write ('\n');
             }
         }
     }

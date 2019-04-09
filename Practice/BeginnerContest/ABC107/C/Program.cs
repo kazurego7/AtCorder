@@ -8,7 +8,20 @@ using static AtCoderTemplate.MyNumericFunctions;
 
 namespace AtCoderTemplate {
     public class Program {
-        public static void Main (string[] args) { }
+        public static void Main (string[] args) {
+            var NK = ReadInts ();
+            var N = NK[0];
+            var K = NK[1];
+            var x = ReadLongs ().Append (0).OrderBy (i => i).ToList ();
+
+            var result = Enumerable.Range (0, N - K + 1).Select (l => {
+                var r = l + K;
+                var lTor = Abs (x[l]) + Abs (x[l] - x[r]);
+                var rTol = Abs (x[r]) + Abs (x[l] - x[r]);
+                return Min (lTor, rTol);
+            }).Min ();
+            Print (result);
+        }
     }
 
     static class MyInputOutputs {
