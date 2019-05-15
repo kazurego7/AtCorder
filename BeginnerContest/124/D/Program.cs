@@ -14,37 +14,38 @@ namespace AtCoderTemplate {
             var K = NK[1];
             var S = Console.ReadLine ();
 
-            var ans = 0;
-            if (isEven (K)) {
-                ans = GoEven (S, 0, K + 1);
-            } else {
-                ans = GoOdd (S, 0, K + 1);
+            var gaps = new List<int> { 0 };
+            foreach (var i in Enumerable.Range (1, S.Count () - 1)) {
+                if (S[i - 1] != S[i]) {
+                    gaps.Add (i);
+                }
             }
+            gaps.Add (S.Length);
 
-            Print (ans);
+            var gapNum = gaps
+                .MapAdjacent ((gap1, gap2) => Abs (gap2 - gap1))
+                .ToList ();
+
+            if (S[0] == '0') gapNum = gapNum.Prepend (0).ToList ();
+            if (S[S.Length - 1] == '0') gapNum.Add (0);
+
+            // PrintRow (gapNum);
+
+            // 累積和
+            var firstSum = gapNum.Take (2 * K + 1).Sum ();
+            // PrintRow (gapNum.Take (2 * K + 1));
+            var sum = new List<int> { firstSum };
+            var k = 1;
+            while (2 * (k + K) < gapNum.Count) {
+                sum.Add (sum[k - 1] -
+                    (gapNum[2 * (k - 1)] + gapNum[2 * (k - 1) + 1]) +
+                    (gapNum[2 * (k + K) - 1] + gapNum[2 * (k + K)]));
+                // Print ($"{k} {sum[k]}");
+                k++;
+            }
+            Print (sum.Max ());
         }
 
-        public static int GoOdd (string S, int count, int k) {
-            if (k == 0) {
-                return count;
-            } else {
-                var countFirst1 = S.Skip (count).TakeWhile (c => c == '1').Count ();
-                var count0 = S.Skip (count + countFirst1).TakeWhile (c => c == '0').Count ();
-                Print ($"1:{countFirst1}, 0:{count0}");
-                return GoOdd (S, count + countFirst1 + count0, k - 1);
-            }
-        }
-
-        public static int GoEven (string S, int count, int k) {
-            if (k == 0) {
-                return count;
-            } else {
-                var countFirst0 = S.Skip (count).TakeWhile (c => c == '0').Count ();
-                var count1 = S.Skip (count + countFirst0).TakeWhile (c => c == '1').Count ();
-                Print ($"0:{countFirst0}, 1:{count1}");
-                return GoEven (S, count + countFirst0 + count1, k - 1);
-            }
-        }
     }
 
     static class MyInputOutputs {
