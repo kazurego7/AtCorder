@@ -15,15 +15,39 @@ namespace AtCoderTemplate {
             var H = HW[0];
             var W = HW[1];
 
-            if (H % 3 == 0 || W % 3 == 0) {
-                Print (0);
-            } else {
-                var max = Max (H, W);
-                var min = Min (H, W);
-                var one = min * (max / 2 - (max % 2 == 0 ? 1 : 0));
-                var two = (max - one) * (min / 2 - (min % 2 != 0 ? 1 : 0));
-                Print (one - two);
-            }
+            var dS1 = Enumerable.Range (0, H)
+                .Select (ah => {
+                    var A = (long) ah * W;
+                    var B = ((long) H - ah) / 2 * W;
+                    var C = (((long) H - ah) / 2 + ((H - ah) % 2 != 0 ? 1 : 0)) * W;
+                    return Max (Max (A, B), C) - Min (Min (A, B), C);
+                }).Min ();
+            var dS2 = Enumerable.Range (0, W)
+                .Select (aw => {
+                    var A = (long) aw * H;
+                    var B = ((long) W - aw) / 2 * H;
+                    var C = (((long) W - aw) / 2 + ((W - aw) % 2 != 0 ? 1 : 0)) * H;
+                    return Max (Max (A, B), C) - Min (Min (A, B), C);
+                }).Min ();
+            var dS3 = Enumerable.Range (0, H)
+                .Select (ah => {
+                    var A = (long) ah * W;
+                    var B = ((long) W / 2) * (H - ah);
+                    var C = ((long) W / 2 + (W % 2 != 0 ? 1 : 0)) * (H - ah);
+                    return Max (Max (A, B), C) - Min (Min (A, B), C);
+                }).Min ();
+            var dS4 = Enumerable.Range (0, W)
+                .Select (aw => {
+                    var A = (long) aw * H;
+                    var B = ((long) H / 2) * (W - aw);
+                    var C = ((long) H / 2 + (H % 2 != 0 ? 1 : 0)) * (W - aw);
+                    return Max (Max (A, B), C) - Min (Min (A, B), C);
+                })
+                .Min ();
+
+            // Print ($"{dS1} {dS2} {dS3} {dS4}");
+            var ans = new List<long> { dS1, dS2, dS3, dS4 }.Min ();
+            Print (ans);
         }
     }
 
