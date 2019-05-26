@@ -16,16 +16,17 @@ namespace AtCoderTemplate {
             var N = NK[0];
             var K = NK[1];
             var V = ReadLongs ();
-            var opNum = Min (N, K);
-            var ans = Enumerable.Range (0, opNum + 1).SelectMany (l =>
-                Enumerable.Range (0, opNum - l + 1).Select (r => {
+            var getMaxNum = Min (N, K);
+            var values = Enumerable.Range (0, getMaxNum + 1).SelectMany (l =>
+                Enumerable.Range (0, getMaxNum - l + 1).Select (r => {
                     var gets = V.Take (l).Concat (V.TakeLast (r));
                     // PrintRow (gets);
                     var plus = gets.Where (get => get >= 0);
                     var minus = gets.Where (get => get < 0).OrderBy (x => x);
-                    return minus.Skip (K - r - l).Concat (plus).Sum ();
-                })).Max ();
-            Print (ans);
+                    var putMaxNum = K - r - l;
+                    return minus.Skip (putMaxNum).Concat (plus).Sum ();
+                }));
+            Print (values.Max ());
         }
     }
 
