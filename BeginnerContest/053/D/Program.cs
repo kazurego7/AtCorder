@@ -14,6 +14,7 @@ namespace AtCoderTemplate {
         public static void Main (string[] args) {
             var N = ReadInt ();
             var A = ReadInts ();
+
         }
     }
 
