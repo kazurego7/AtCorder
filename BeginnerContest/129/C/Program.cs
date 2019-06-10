@@ -15,34 +15,20 @@ namespace AtCoderTemplate {
             var NM = ReadInts ();
             var N = NM[0];
             var M = NM[1];
-            var a = ReadIntColumns (M) [0];
+            var column = ReadIntColumns (M);
+            var a = column.IsEmpty () ? Enumerable.Empty<int> () : column[0];
             var divisor = 1000000007L;
 
-            var counts = a.MapAdjacent (
-                (a1, a2) => a2 - a1 - 1
-            );
-            // Print (PowRem (2, 10, divisor));
-            var isNotReached = counts.Any (i => i == 0);
-            if (isNotReached) {
-                Print (0);
-            } else if (M == 0) {
-                var ans = IsEven (N) ? PowRem (2, N / 2, divisor) : PowRem (2, (N - 1) / 2, divisor);
-                Print (ans);
-            } else {
-                var first = IsEven (a[0]) ? PowRem (2, a[0] / 2, divisor) : PowRem (2, (a[0] - 1) / 2, divisor);
-                var last = a[M - 1] == N ?
-                    1 :
-                    (IsEven (N - a[M - 1]) ? PowRem (2, (N - a[M - 1]) / 2, divisor) : PowRem (2, (N - a[M - 1] - 1) / 2, divisor));
-                var middles = counts.Select (i => IsEven (i) ? PowRem (2, i / 2, divisor) : PowRem (2, (i - 1) / 2, divisor));
-                var middle = middles.Aggregate (1L, (accm, ci) => (accm * ci) % divisor);
-                PrintRow (middles);
-                Print (((first * middle) % divisor * last) % divisor);
+            var isOks = new HashSet<int> (a);
+            var dp = new long[N + 1];
+            dp[0] = 1;
+            dp[1] = isOks.Contains (1) ? 0 : 1;
+            foreach (var i in Enumerable.Range (2, N - 1)) {
+                if (!isOks.Contains (i)) {
+                    dp[i] = (dp[i - 1] + dp[i - 2]) % divisor;
+                }
             }
-        }
-
-        public static long PowRem (int x, int y, long divisor) {
-            return Enumerable.Repeat (x, y)
-                .Aggregate (1L, (accm, xi) => (accm * xi) % divisor);
+            Print (dp[N]);
         }
     }
 
