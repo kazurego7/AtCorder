@@ -14,22 +14,21 @@ namespace AtCoderTemplate {
         public static void Main (string[] args) {
             var N = ReadInt ();
             var abc = ReadRows (N).Select (row => row.ToInts ().ToOneBasedIndexing ()).ToOneBasedIndexing ();
-            var init = new List<KeyValuePair<Tuple<int, int>, int>> {
-                    KeyValuePair.Create (Tuple.Create (1, 1), abc[1][1]),
-                    KeyValuePair.Create (Tuple.Create (1, 2), abc[1][2]),
-                    KeyValuePair.Create (Tuple.Create (1, 3), abc[1][3]),
-                };
             var patterns = MyEnumerable.Interval (2, N + 1).SelectMany (i =>
-                Enumerable.Range (1, 3).Select (j => Tuple.Create (i, j)));
+                MyEnumerable.Interval (1, 3 + 1).Select (k => (i, k)));
+            var init = new [] {
+                ((1, 1), abc[1][1]),
+                ((1, 2), abc[1][2]),
+                ((1, 3), abc[1][3]),
+            };
             var dict = DynamicProgramming (patterns, init, (dp, index) => {
-                var i = index.Item1;
-                var k = index.Item2;
-                return Enumerable.Range (1, 3)
-                    .Where (j => j != k)
-                    .Select (j => dp[Tuple.Create (i - 1, j)] + abc[i][k])
+                var (i, k) = index;
+                return MyEnumerable.Interval (1, 3 + 1)
+                    .Where (m => m != k)
+                    .Select (m => dp[(i - 1, m)] + abc[i][k])
                     .Max ();
             });
-            Print (Enumerable.Range (1, 3).Select (k => dict[Tuple.Create (N, k)]).Max ());
+            Print (Enumerable.Range (1, 3).Select (k => dict[(N, k)]).Max ());
         }
     }
 
@@ -377,20 +376,21 @@ namespace AtCoderTemplate {
 
         /// <summary>
         /// DynamicProgrammingの形式(貰うDP)
+        /// 項dp_(i,j,k...)の漸化式、初項、漸化式の計算順序（添字のパターン）、から漸化式を計算する
         /// </summary>
-        /// <param name="initialConditions">初項とその添字のペア</param>
-        /// <param name="recurrenceRelation">漸化式、以前の項の計算はDictonaryから得る</param>
-        /// <param name="patterns">項dp_(i,j,k...)とその添字(i,j,k...)のペアのトポロジカル順序を持つシーケンス.</param>
+        /// <param name="calculationOrders">漸化式の計算順序、項dp_(i,j,k...)の添字(i,j,k...)のトポロジカル順序を持つシーケンス</param>
+        /// <param name="initialConditions">初項とその添字のペア、のシーケンス</param>
+        /// <param name="recurrenceRelation">項dp_(i,j,k...)の漸化式、以前の項の計算はDictonaryから得る</param>
         /// <typeparam name="Indexes">項dp_(i,j,k...)の添字(i,j,k...)</typeparam>
-        /// <typeparam name="Result">項dp_(i,j,k...)の計算結果</typeparam>
+        /// <typeparam name="Result">項dp_(i,j,k...)</typeparam>
         /// <returns>項dp_(i,j,k...)の全ての計算結果をDictionaryで返す</returns>
         public static Dictionary<Indexes, Result> DynamicProgramming<Indexes, Result> (
-            IEnumerable<Indexes> patterns //
-            , IEnumerable<KeyValuePair<Indexes, Result>> initialConditions //
+            IEnumerable<Indexes> calculationOrders //
+            , IEnumerable < (Indexes indexes, Result result) > initialConditions //
             , Func<Dictionary<Indexes, Result>, Indexes, Result> recurrenceRelation) {
-            var conditions = initialConditions.ToDictionary (kv => kv.Key, kv => kv.Value);
-            foreach (var pattern in patterns) {
-                conditions.Add (pattern, recurrenceRelation (conditions, pattern));
+            var conditions = initialConditions.ToDictionary (kv => kv.indexes, kv => kv.result);
+            foreach (var order in calculationOrders) {
+                conditions.Add (order, recurrenceRelation (conditions, order));
             }
             return conditions;
         }
