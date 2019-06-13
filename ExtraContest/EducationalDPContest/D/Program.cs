@@ -16,15 +16,13 @@ namespace AtCoderTemplate {
             var N = NW[0];
             var W = NW[1];
             var wv = ReadColumns (N, 2);
-            var w = wv[0].ToInts ();
-            var v = wv[1].ToLongs ();
+            var w = wv[0].ToInts ().Prepend (0).ToList ();
+            var v = wv[1].ToLongs ().Prepend (0).ToList ();
 
-            var dp = new long[N, W + 1];
-            foreach (var i in MyEnumerable.Interval (0, N)) {
+            var dp = new long[N + 1, W + 1];
+            foreach (var i in MyEnumerable.Interval (1, N + 1)) {
                 foreach (var k in MyEnumerable.Interval (0, W + 1)) {
-                    if (i == 0) {
-                        dp[i, k] = 0;
-                    } else if (k - w[i] < 0) {
+                    if (k - w[i] < 0) {
                         dp[i, k] = dp[i - 1, k];
                     } else {
                         dp[i, k] = Max (dp[i - 1, k - w[i]] + v[i], dp[i - 1, k]);
@@ -33,7 +31,7 @@ namespace AtCoderTemplate {
             }
 
             var ans = MyEnumerable.Interval (0, W + 1)
-                .Max (k => dp[N - 1, k]);
+                .Max (k => dp[N, k]);
             Print (ans);
         }
     }
