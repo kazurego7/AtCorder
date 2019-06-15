@@ -11,7 +11,10 @@ using static AtCoderTemplate.MyExtensions;
 
 namespace AtCoderTemplate {
     public class Program {
-        public static void Main (string[] args) { }
+        public static void Main (string[] args) {
+            var N = ReadLong ();
+            var divisor = (int) Pow (10, 9) + 7;
+        }
     }
 
     public static class MyInputOutputs {
