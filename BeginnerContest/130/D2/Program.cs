@@ -427,26 +427,24 @@ namespace AtCoderTemplate {
         /// <summary>
         /// 右へのしゃくとり法
         /// </summary>
-        /// <param name="N">なめるシーケンスの長さ</param>
-        /// <param name="Predicate">更新のための条件関数。indexの(left,right)をとり、条件を満たすかどうかを返す</param>
+        /// <param name="n">なめるシーケンスの長さ</param>
+        /// <param name="Predicate">更新のための条件関数。indexの(left,right)をとり、条件を満たすとUpdateConditionを行う</param>
         /// <param name="initialCondition">初期状態。</param>
         /// <param name="UpdateCondition">状態更新関数。indexのleft, rightと前のconditionをとり、更新したconditionを返す</param>
         /// <typeparam name="TR"></typeparam>
         /// <returns></returns>
-        public static TR TwoPointersRightMethod<TR> (int N, Func<int, int, bool> Predicate, TR initialCondition, Func<int, int, TR, TR> UpdateCondition) {
+        public static TR TwoPointersRightMethod<TR> (int n, Func<int, int, bool> Predicate, TR initialCondition, Func<int, int, TR, TR> UpdateCondition) {
             var l = 0;
             var r = 0;
             TR condition = initialCondition;
-            while (r < N) {
-                while (!Predicate (l, r)) {
+            while (r < n) {
+                while (r < n && !Predicate (l, r)) {
                     r += 1;
-                    if (r >= N) break;
                 }
-                while (r < N && Predicate (l, r)) {
-                    l += 1;
+                while (r < n && Predicate (l, r)) {
                     condition = UpdateCondition (l, r, condition);
+                    l += 1;
                     if (l == r) {
-                        r += 1;
                         break;
                     }
                 }
