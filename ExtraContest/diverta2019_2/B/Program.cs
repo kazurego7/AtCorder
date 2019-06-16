@@ -16,21 +16,26 @@ namespace AtCoderTemplate {
             var xy = ReadColumns (N, 2);
             var x = xy[0].ToInts ();
             var y = xy[1].ToInts ();
+
             if (N == 1) {
                 Print (1);
-                return;
+            } else {
+                var pqs = Enumerable.Range (0, N).SelectMany (i =>
+                    Enumerable.Range (0, N)
+                    .Where (k => i != k)
+                    .Select (k => new { p = x[i] - x[k], q = y[i] - y[k] })
+                );
+                var ans = pqs.Select (pq => {
+                        var p = pq.p;
+                        var q = pq.q;
+                        var zeroCount = Enumerable.Range (0, N).Where (i =>
+                            Enumerable.Range (0, N).Any (k => x[i] - p == x[k] && y[i] - q == y[k])
+                        ).Count ();
+                        return N - zeroCount;
+                    })
+                    .Min ();
+                Print (ans);
             }
-            var ordered = MyEnumerable.Interval (0, N)
-                .OrderBy (i => x[i])
-                .GroupBy (i => x[i])
-                .SelectMany (xgroup => xgroup.OrderBy (i => y[i]));
-            var pqs = ordered.MapAdjacent ((i0, i1) => new { p = x[i1] - x[i0], q = y[i1] - y[i0] });
-            var ans = pqs.Select (pq =>
-                Enumerable.Range (0, N - 1)
-                .Where (k => x[k] != x[k + 1] - pq.p || y[k] != y[k + 1] - pq.q)
-                .Count ()
-            ).Min ();
-            Print (ans);
         }
     }
 
