@@ -24,12 +24,9 @@ namespace AtCoderTemplate {
             while (r <= N) {
                 while (sumL[r] - sumL[l] < K) {
                     r += 1;
-                    if (r > N) {
-                        Print (count);
-                        return;
-                    }
+                    if (r > N) break;
                 }
-                while (sumL[r] - sumL[l] >= K) {
+                while (r <= N && sumL[r] - sumL[l] >= K) {
                     l += 1;
                     count += N + 1 - r;
                     if (l == r) {
