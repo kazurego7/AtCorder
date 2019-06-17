@@ -11,7 +11,67 @@ using static AtCoderTemplate.MyExtensions;
 
 namespace AtCoderTemplate {
     public class Program {
-        public static void Main (string[] args) { }
+        public static void Main (string[] args) {
+            var HW = ReadInts ();
+            var H = HW[0];
+            var W = HW[1];
+            var S = Enumerable.Range (0, H).Select (i => Read ().Select (c => c.ToString ()).ToList ()).ToList ();
+            var L = new int[H, W];
+            foreach (var i in MyEnumerable.Interval (0, H)) {
+                foreach (var j in MyEnumerable.Interval (0, W)) {
+                    if (S[i][j] == "#") {
+                        L[i, j] = 0;
+                    } else if (j == 0) {
+                        L[i, j] = 1;
+                    } else {
+                        L[i, j] = L[i, j - 1] + 1;
+                    }
+                }
+            }
+            var R = new int[H, W];
+            foreach (var i in MyEnumerable.Interval (0, H)) {
+                foreach (var j in MyEnumerable.Interval (0, W).Reverse ()) {
+                    if (S[i][j] == "#") {
+                        R[i, j] = 0;
+                    } else if (j == W - 1) {
+                        R[i, j] = 1;
+                    } else {
+                        R[i, j] = R[i, j + 1] + 1;
+                    }
+                }
+            }
+            var U = new int[H, W];
+            foreach (var i in MyEnumerable.Interval (0, H)) {
+                foreach (var j in MyEnumerable.Interval (0, W)) {
+                    if (S[i][j] == "#") {
+                        U[i, j] = 0;
+                    } else if (i == 0) {
+                        U[i, j] = 1;
+                    } else {
+                        U[i, j] = U[i - 1, j] + 1;
+                    }
+                }
+            }
+            var D = new int[H, W];
+            foreach (var i in MyEnumerable.Interval (0, H).Reverse ()) {
+                foreach (var j in MyEnumerable.Interval (0, W)) {
+                    if (S[i][j] == "#") {
+                        D[i, j] = 0;
+                    } else if (i == H - 1) {
+                        D[i, j] = 1;
+                    } else {
+                        D[i, j] = D[i + 1, j] + 1;
+                    }
+                }
+            }
+
+            var max = MyEnumerable.Interval (0, H).Select (i =>
+                MyEnumerable.Interval (0, W).Select (j =>
+                    L[i, j] + R[i, j] + U[i, j] + D[i, j] - 3
+                ).Max ()
+            ).Max ();
+            Print (max);
+        }
     }
 
     public static class MyInputOutputs {
@@ -24,7 +84,7 @@ namespace AtCoderTemplate {
             return Console.ReadLine ().Split (' ').ToList ();
         }
 
-        public static List<List<string>> ReadRows (int n) {
+        public static List<List<string>> ReadRows (int rowNum) {
             /*
             入力例
             A1 B1 C1 ... Z1
@@ -36,10 +96,10 @@ namespace AtCoderTemplate {
             出力例
             [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
             */
-            return Enumerable.Range (0, n).Select (i => Reads ()).ToList ();
+            return Enumerable.Range (0, rowNum).Select (i => Reads ()).ToList ();
         }
 
-        public static List<List<string>> ReadColumns (int n) {
+        public static List<List<string>> ReadColumns (int rowNum, int colNum) {
             /*
             入力例
             A1 B1 C1 ... Z1
@@ -51,9 +111,8 @@ namespace AtCoderTemplate {
             出力例
             [[A1, A2, A3, ... An], [B1, B2, B3, ... Bn], ... [Z1, Z2, Z3, ... Zn]]
             */
-            var rows = ReadRows (n);
-            var m = rows.IsEmpty () ? 0 : rows[0].Count;
-            return Enumerable.Range (0, m).Select (i => rows.Select (items => items[i].ToString ()).ToList ()).ToList ();
+            var rows = ReadRows (rowNum);
+            return Enumerable.Range (0, colNum).Select (i => rows.Select (items => items[i].ToString ()).ToList ()).ToList ();
         }
 
         public static int ToInt (this string str) {
@@ -84,13 +143,6 @@ namespace AtCoderTemplate {
         }
         public static List<long> ReadLongs () {
             return Reads ().ToLongs ();
-        }
-
-        public static List<List<int>> ReadIntColumns (int n) {
-            return ReadColumns (n).Select (column => column.ToInts ()).ToList ();
-        }
-        public static List<List<long>> ReadLongColumns (int n) {
-            return ReadColumns (n).Select (column => column.ToLongs ()).ToList ();
         }
 
         public static void Print<T> (T item) {
@@ -136,12 +188,10 @@ namespace AtCoderTemplate {
     }
 
     public static class MyConstants {
-        public static List<char> LowerAlphabets () {
-            return Enumerable.Range ('a', 'z' - 'a' + 1).Select (i => (char) i).ToList ();
-        }
-        public static List<char> UpperAlphabets () {
-            return Enumerable.Range ('A', 'Z' - 'A' + 1).Select (i => (char) i).ToList ();
-        }
+        public static IEnumerable<char> lowerAlphabets = Enumerable.Range ('a', 'z' - 'a' + 1).Select (i => (char) i);
+        public static IEnumerable<char> upperAlphabets = Enumerable.Range ('A', 'Z' - 'A' + 1).Select (i => (char) i);
+
+        public static int p10_9plus7 = (int) Pow (10, 9) + 7;
     }
 
     public static class MyNumericFunctions {
@@ -159,18 +209,30 @@ namespace AtCoderTemplate {
         }
 
         /// <summary>
+        /// 冪を得る
+        /// </summary>
+        /// <param name="b">底</param>
+        /// <param name="n">冪指数</param>
+        /// <param name="divisor">返り値がintを超えないようにdivisorで割ったあまりを得る</param>
+        /// <returns>bのn乗(をdivisorで割ったあまり)</returns>
+        public static int PowRem (long b, int n, int divisor) {
+            return Enumerable.Repeat (b, n)
+                .Aggregate (1, (accm, i) => (int) ((accm * i) % divisor));
+        }
+
+        /// <summary>
         /// 順列の総数を得る
         /// O(N-K)
         /// </summary>
         /// <param name="n">全体の数</param>
         /// <param name="k">並べる数</param>
-        /// <param name="divisor">返り値がlongを超えないようにdivisorで割った余りを得る</param>
+        /// <param name="divisor">返り値がintを超えないようにdivisorで割った余りを得る</param>
         /// <returns>nPk (をdivisorで割った余り)</returns>
-        public static long nPk (int n, int k, long divisor) {
+        public static int nPk (int n, int k, int divisor) {
             if (k > n) {
-                return 0L;
+                return 0;
             } else {
-                return Enumerable.Range (n - k + 1, k).Aggregate (1L, ((i, m) => (i * m) % divisor));
+                return Enumerable.Range (n - k + 1, k).Aggregate (1, ((i, m) => (i * m) % divisor));
             }
         }
 
@@ -187,9 +249,9 @@ namespace AtCoderTemplate {
         /// O(N)
         /// </summary>
         /// <param name="n"></param>
-        /// <param name="divisor">返り値がlongを超えないようにdivisorで割った余りを得る</param>
+        /// <param name="divisor">返り値がintを超えないようにdivisorで割った余りを得る</param>
         /// <returns>n! (をdivisorで割った余り)</returns>
-        public static long Fact (int n, long divisor) {
+        public static int Fact (int n, int divisor) {
             return nPk (n, n, divisor);
         }
 
@@ -331,7 +393,7 @@ namespace AtCoderTemplate {
         /// <param name="predicate">条件の述語関数</param>
         /// <param name="ng">条件を満たさない既知のindex</param>
         /// <param name="ok">条件を満たす既知のindex</param>
-        /// <returns>条件を満たすindexの内、境界に最も近いものを返す</returns>
+        /// <returns>条件を満たすindexの内、隣がfalseとなるtrueのindexを返す</returns>
         public static int BinarySearch<T> (List<T> list, Func<T, bool> predicate, int ng, int ok) {
             while (Abs (ok - ng) > 1) {
                 int mid = (ok + ng) / 2;
@@ -345,25 +407,100 @@ namespace AtCoderTemplate {
         }
 
         /// <summary>
-        /// 二分探索法
+        /// 左二分探索法
         /// </summary>
-        /// <param name="list">条件の境界に対し、条件を満たすindexが左にあるリスト</param>
+        /// <param name="list">条件の境界(falseとtrueの変わるところ)で、trueが左にあるリスト</param>
         /// <param name="predicate">条件の述語関数</param>
-        /// <returns>条件を満たすindexの内、境界に最も近いものを返す</returns>
-        public static int BinarySearchLeft<T> (List<T> list, Func<T, bool> predicate) {
+        /// <returns>左隣がfalseになるtrueのindexを返す</returns>
+        public static int LeftBinarySearch<T> (List<T> list, Func<T, bool> predicate) {
             return BinarySearch (list, predicate, list.Count, -1);
         }
 
         /// <summary>
-        /// 二分探索法
+        /// 右二分探索法
         /// </summary>
-        /// <param name="list">条件の境界に対し、条件を満たすindexが右にあるリスト</param>
+        /// <param name="list">条件の境界(falseとtrueの変わるところ)で、trueが右にあるリスト</param>
         /// <param name="predicate">条件の述語関数</param>
-        /// <returns>条件を満たすindexの内、境界に最も近いものを返す</returns>
-        public static int BinarySearchRight<T> (List<T> list, Func<T, bool> predicate) {
+        /// <returns>左隣がfalseになるtrueのindexを返す</returns>
+        public static int RightBinarySearch<T> (List<T> list, Func<T, bool> predicate) {
             return BinarySearch (list, predicate, -1, list.Count);
         }
 
+        // Dictionaryがcapacity近くになるとゲロ重かったので削除
+        // 配列にするかも
+
+        // /// <summary>
+        // /// DynamicProgrammingの形式(貰うDP)
+        // /// 項dp_(i,j,k...)の漸化式、初項、漸化式の計算順序（添字のパターン）、から漸化式を計算する
+        // /// </summary>
+        // /// <param name="calculationOrders">漸化式の計算順序、項dp_(i,j,k...)の添字(i,j,k...)のトポロジカル順序を持つシーケンス</param>
+        // /// <param name="initialConditions">初項とその添字のペア、のシーケンス</param>
+        // /// <param name="recurrenceRelation">項dp_(i,j,k...)の漸化式、以前の項の計算はDictonaryから得る</param>
+        // /// <typeparam name="Indexes">項dp_(i,j,k...)の添字(i,j,k...)</typeparam>
+        // /// <typeparam name="Result">項dp_(i,j,k...)の計算結果</typeparam>
+        // /// <returns>項dp_(i,j,k...)の全ての計算結果をDictionaryで返す</returns>
+        // public static Dictionary<Indexes, Result> DynamicProgramming<Indexes, Result> (
+        //     IEnumerable<Indexes> calculationOrders //
+        //     , IEnumerable<KeyValuePair<Indexes, Result>> initialConditions //
+        //     , Func<Dictionary<Indexes, Result>, Indexes, Result> recurrenceRelation) {
+        //     var conditions = initialConditions.ToDictionary (kv => kv.Key, kv => kv.Value);
+        //     foreach (var order in calculationOrders) {
+        //         conditions.Add (order, recurrenceRelation (conditions, order));
+        //     }
+        //     return conditions;
+        // }
+
+        // .NetFramework 4.6.2 ではタプルの記法がまだ使えない
+
+        // /// <summary>
+        // /// DynamicProgrammingの形式(貰うDP)
+        // /// 項dp_(i,j,k...)の漸化式、初項、漸化式の計算順序（添字のパターン）、から漸化式を計算する
+        // /// </summary>
+        // /// <param name="calculationOrders">漸化式の計算順序、項dp_(i,j,k...)の添字(i,j,k...)のトポロジカル順序を持つシーケンス</param>
+        // /// <param name="initialConditions">初項とその添字のペア、のシーケンス</param>
+        // /// <param name="recurrenceRelation">項dp_(i,j,k...)の漸化式、以前の項の計算はDictonaryから得る</param>
+        // /// <typeparam name="Indexes">項dp_(i,j,k...)の添字(i,j,k...)</typeparam>
+        // /// <typeparam name="Result">項dp_(i,j,k...)の計算結果</typeparam>
+        // /// <returns>項dp_(i,j,k...)の全ての計算結果をDictionaryで返す</returns>
+        // public static Dictionary<Indexes, Result> DynamicProgramming<Indexes, Result> (
+        //     IEnumerable<Indexes> calculationOrders //
+        //     , IEnumerable < (Indexes indexes, Result result) > initialConditions //
+        //     , Func<Dictionary<Indexes, Result>, Indexes, Result> recurrenceRelation) {
+        //     var conditions = initialConditions.ToDictionary (kv => kv.indexes, kv => kv.result);
+        //     foreach (var order in calculationOrders) {
+        //         conditions.Add (order, recurrenceRelation (conditions, order));
+        //     }
+        //     return conditions;
+        // }
+
+        /// <summary>
+        /// 右へのしゃくとり法の形式
+        /// </summary>
+        /// <param name="n">なめるシーケンスの長さ</param>
+        /// <param name="Predicate">更新のための条件関数。indexの(left,right)をとり、条件を満たすとUpdateConditionを行う</param>
+        /// <param name="initialCondition">初期状態。</param>
+        /// <param name="Update">状態更新関数。indexのleft, rightと前のconditionをとり、更新したconditionを返す</param>
+        /// <typeparam name="TR"></typeparam>
+        /// <returns></returns>
+        public static TR TwoPointersRight<TR> (int n, Func<int, int, bool> Predicate, TR initialCondition, Func<int, int, TR, TR> Update) {
+            var l = 0;
+            var r = 0;
+            TR condition = initialCondition;
+            while (r < n) {
+                while (r < n && !Predicate (l, r)) {
+                    r += 1;
+                }
+                while (r < n && l != r && Predicate (l, r)) {
+                    condition = Update (l, r, condition);
+                    l += 1;
+                }
+            }
+            return condition;
+        }
+
+        /// <summary>
+        /// 重み付きの辺
+        /// </summary>
         public struct WeightEdge {
             int SourceNode { get; }
             int TargetNode { get; }
@@ -536,6 +673,19 @@ namespace AtCoderTemplate {
                 result.Add (func (result[i - 1], list[i]));
             }
             return result;
+        }
+    }
+
+    public static class MyEnumerable {
+
+        /// <summary>
+        /// 左閉右開区間 [startIndex,endIndex) を得る
+        /// </summary>
+        /// <param name="startIndex">始まりのインデックス。含む</param>
+        /// <param name="endIndex">終わりのインデックス。含まない</param>
+        public static IEnumerable<int> Interval (int startIndex, int endIndex) {
+            if (endIndex - startIndex < 0) new ArgumentException ();
+            return Enumerable.Range (startIndex, endIndex - startIndex);
         }
     }
 }
