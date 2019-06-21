@@ -22,21 +22,21 @@ namespace AtCoderTemplate {
                 ).ToList ()
             ).ToList ();
 
-            var iks = MyEnumerable.Interval (0, H).SelectMany (i =>
-                MyEnumerable.Interval (0, W).Select (k =>
-                    Tuple.Create (i, k)
+            var yxs = MyEnumerable.Interval (0, H).SelectMany (y =>
+                MyEnumerable.Interval (0, W).Select (x =>
+                    Tuple.Create (y, x)
                 )
             );
 
-            var s = iks.First (t => {
-                var i = t.Item1;
-                var k = t.Item2;
-                return c[i][k] == 's';
+            var s = yxs.First (t => {
+                var y = t.Item1;
+                var x = t.Item2;
+                return c[y][x] == 's';
             });
-            var g = iks.First (t => {
-                var i = t.Item1;
-                var k = t.Item2;
-                return c[i][k] == 'g';
+            var g = yxs.First (t => {
+                var y = t.Item1;
+                var x = t.Item2;
+                return c[y][x] == 'g';
             });
 
             // init
