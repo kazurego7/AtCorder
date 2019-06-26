@@ -14,9 +14,45 @@ namespace AtCoderTemplate {
         public static void Main (string[] args) {
             var N = ReadInt ();
             var uvw = ReadColumns (N - 1, 3);
-            var u = uvw[0].ToInts ();
-            var v = uvw[0].ToInts ();
-            var w = uvw[0].ToLongs ();
+            var u = uvw[0].ToInts ().Select (i => i - 1).ToList ();
+            var v = uvw[1].ToInts ().Select (i => i - 1).ToList ();
+            var w = uvw[2].ToLongs ();
+
+            var edges = ToEdges (u, v, w);
+            var adjMatrix = Enumerable.Range (0, N).Select (i => new Dictionary<int, long> ()).ToList ();
+            foreach (var edge in edges) {
+                adjMatrix[edge.SourceNode].Add (edge.TargetNode, edge.Weight);
+                adjMatrix[edge.TargetNode].Add (edge.SourceNode, edge.Weight);
+            }
+
+            var seen = Enumerable.Repeat (false, N).ToList ();
+            var color = Enumerable.Repeat (-1, N).ToList ();
+            var parents = Enumerable.Repeat (-1, N).ToList ();
+            var todo = new Queue<int> ();
+            todo.Enqueue (u[0]);
+            while (!todo.IsEmpty ()) {
+                var me = todo.Dequeue ();
+                var parent = parents[me];
+
+                if (seen[me]) continue;
+
+                if (parent == -1) {
+                    color[me] = 0;
+                } else if (IsEven (adjMatrix[parent][me])) {
+                    color[me] = color[parent]; // 同じ色
+                } else {
+                    color[me] = color[parent] == 0 ? 1 : 0; // 反対の色
+                }
+                seen[me] = true;
+
+                foreach (var child in adjMatrix[me].Keys) {
+                    todo.Enqueue (child);
+                    parents[child] = me;
+                }
+            }
+
+            PrintColomn (color);
+
         }
     }
 
@@ -59,6 +95,26 @@ namespace AtCoderTemplate {
             */
             var rows = ReadRows (rowNum);
             return Enumerable.Range (0, colNum).Select (i => rows.Select (items => items[i].ToString ()).ToList ()).ToList ();
+        }
+
+        public static List<List<string>> ReadGridGraph (int height, int width) {
+            /*
+            入力例
+            A1B1C1...Z1
+            A2B2C2...Z2
+            ...
+            AnBnCn...Zn
+           
+
+            出力例
+            [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
+            */
+            return Enumerable.Range (0, height)
+                .Select (i =>
+                    Read ()
+                    .Select (c => c.ToString ())
+                    .ToList ()
+                ).ToList ();
         }
 
         public static int ToInt (this string str) {
@@ -131,6 +187,12 @@ namespace AtCoderTemplate {
                 PrintRow (row);
             }
         }
+
+        public static void PrintGridGraph<T> (IEnumerable<IEnumerable<T>> sources) {
+            foreach (var row in sources) {
+                Print (String.Concat (row));
+            }
+        }
     }
 
     public static class MyConstants {
@@ -150,7 +212,7 @@ namespace AtCoderTemplate {
         public static bool IsOdd (int a) {
             return !IsEven (a);
         }
-        public static bool IsOdd (long a) {
+        public static bool IsEv (long a) {
             return !IsEven (a);
         }
 
@@ -357,7 +419,7 @@ namespace AtCoderTemplate {
         /// </summary>
         /// <param name="list">条件の境界(falseとtrueの変わるところ)で、trueが左にあるリスト</param>
         /// <param name="predicate">条件の述語関数</param>
-        /// <returns>左隣がfalseになるtrueのindexを返す</returns>
+        /// <returns>右隣がfalseになるtrueのindexを返す</returns>
         public static int LeftBinarySearch<T> (List<T> list, Func<T, bool> predicate) {
             return BinarySearch (list, predicate, list.Count, -1);
         }
@@ -445,95 +507,63 @@ namespace AtCoderTemplate {
         }
 
         /// <summary>
-        /// 重み付きの辺
+        /// グラフの辺
         /// </summary>
-        public struct WeightEdge {
-            int SourceNode { get; }
-            int TargetNode { get; }
-            long Weight { get; }
+        public struct Edge {
+            public int SourceNode { get; }
+            public int TargetNode { get; }
+            public long Weight { get; }
 
-            public WeightEdge (int sourceNode, int targetNode, long weight) {
+            public Edge (int sourceNode, int targetNode, long weight) {
                 SourceNode = sourceNode;
                 TargetNode = targetNode;
                 Weight = weight;
             }
         }
 
-        public static List<WeightEdge> ToWeightEdges (List<int> sourceNodes, List<int> targetNodes, List<long> weights) {
+        public static IEnumerable<Edge> ToEdges (List<int> sourceNodes, List<int> targetNodes, List<long> weights) {
             return Enumerable.Range (0, sourceNodes.Count)
-                .Select (i => new WeightEdge (sourceNode: sourceNodes[i], targetNode: targetNodes[i], weight: weights[i]))
-                .ToList ();
+                .Select (i => new Edge (sourceNode: sourceNodes[i], targetNode: targetNodes[i], weight: weights[i]));
         }
 
-        /// <summary>
-        /// 重み付きグラフ
-        /// </summary>
-        public class WeightGraph {
-            long[, ] adjacencyMatrix;
-            public int NodeNum { get; }
-            public WeightGraph (int nodeNum, long weightOfNoEdge) {
-                var adjacencyMatrix = new long[nodeNum, nodeNum];
-                foreach (var i in Enumerable.Range (0, nodeNum)) {
-                    foreach (var j in Enumerable.Range (0, nodeNum)) {
-                        if (i != j) {
-                            adjacencyMatrix[i, j] = weightOfNoEdge;
-                        } else {
-                            adjacencyMatrix[i, j] = 0;
-                        }
-                    }
-                }
-
-                this.adjacencyMatrix = adjacencyMatrix;
-                this.NodeNum = nodeNum;
+        public static List<IEnumerable<int>> ToAdjacencyListOfUndirectedGraph (IEnumerable<Edge> edges, int nodeNum) {
+            var adjacencyList = Enumerable.Range (0, nodeNum).Select (_ => Enumerable.Empty<int> ()).ToList ();
+            foreach (var edge in edges) {
+                adjacencyList[edge.SourceNode] = adjacencyList[edge.SourceNode].Append (edge.TargetNode);
+                adjacencyList[edge.TargetNode] = adjacencyList[edge.TargetNode].Append (edge.SourceNode);
             }
+            return adjacencyList;
+        }
 
-            public WeightGraph (List<WeightEdge> edges, int nodeNum, long weightOfNoEdge) {
-                var adjacencyMatrix = new long[nodeNum, nodeNum];
-                foreach (var edge in edges) {
-
-                }
-            }
-
-            public WeightGraph (WeightGraph graph) {
-                this.adjacencyMatrix = new long[graph.NodeNum, graph.NodeNum];
-                foreach (var i in Enumerable.Range (0, graph.NodeNum)) {
-                    foreach (var j in Enumerable.Range (0, graph.NodeNum)) {
-                        this.adjacencyMatrix[i, j] = graph.GetLength (i, j);
-                    }
-                }
-                this.NodeNum = graph.NodeNum;
-            }
-
-            public List<List<long>> ToList () {
-                return Enumerable.Range (0, NodeNum).Select (i =>
-                    Enumerable.Range (0, NodeNum).Select (j =>
-                        adjacencyMatrix[i, j]
+        public static List<List<long>> ToAdjacencyMatrixOfUndirectedGraph (IEnumerable<Edge> edges, int nodeNum, long weightOfNoEdge) {
+            var adjacencyMatrix = Enumerable.Range (0, nodeNum)
+                .Select (i =>
+                    Enumerable.Range (0, nodeNum)
+                    .Select (k =>
+                        weightOfNoEdge
                     ).ToList ()
                 ).ToList ();
+            foreach (var edge in edges) {
+                adjacencyMatrix[edge.SourceNode][edge.TargetNode] = edge.Weight;
+                adjacencyMatrix[edge.TargetNode][edge.SourceNode] = edge.Weight;
             }
-
-            public void Add (int node1, int node2, long distance) {
-                adjacencyMatrix[node1, node2] = distance;
-            }
-
-            public long GetLength (int node1, int node2) {
-                return adjacencyMatrix[node1, node2];
-            }
+            return adjacencyMatrix;
         }
 
         /// <summary>
         /// ワーシャルフロイド法
         /// O(N^3)
         /// </summary>
-        /// <param name="graph">グラフ</param>
+        /// <param name="adjacencyMatrix">隣接行列</param>
         /// <param name="nodeNum">ノードの数</param>
-        /// <returns>各ノード間の最短距離を辺として持つグラフ</returns>
-        public static WeightGraph WarshallFloyd (WeightGraph graph) {
-            var res = new WeightGraph (graph);
-            foreach (var b in Enumerable.Range (0, graph.NodeNum)) {
-                foreach (var a in Enumerable.Range (0, graph.NodeNum)) {
-                    foreach (var c in Enumerable.Range (0, graph.NodeNum)) {
-                        res.Add (a, c, Min (res.GetLength (a, c), res.GetLength (a, b) + res.GetLength (b, c)));
+        /// <returns>各ノード間の最短距離を重みとする隣接行列</returns>
+        public static List<List<long>> WarshallFloyd (List<List<long>> adjacencyMatrix) {
+            var nodeNum = adjacencyMatrix.Count;
+            var res = Enumerable.Range (0, nodeNum).Select (i => new List<long> (adjacencyMatrix[i])).ToList ();
+            foreach (var b in Enumerable.Range (0, nodeNum)) {
+                foreach (var a in Enumerable.Range (0, nodeNum)) {
+                    foreach (var c in Enumerable.Range (0, nodeNum)) {
+                        res[a][c] = Min (res[a][c], res[a][b] + res[b][c]);
                     }
                 }
             }
@@ -564,6 +594,13 @@ namespace AtCoderTemplate {
             return !source.Any ();
         }
 
+        /// <summary>
+        /// シーケンスの要素ごとに副作用を起こす（シーケンスはそのまま）
+        /// </summary>
+        /// <param name="source">シーケンス</param>
+        /// <param name="action">副作用。要素をとるアクション</param>
+        /// <typeparam name="T">シーケンスの要素の型</typeparam>
+        /// <returns>元のシーケンス</returns>
         public static IEnumerable<T> Do<T> (this IEnumerable<T> source, Action<T> action) {
             foreach (var item in source) {
                 action (item);
@@ -571,8 +608,27 @@ namespace AtCoderTemplate {
             return source;
         }
 
+        /// <summary>
+        /// パイプライン演算子のようにデータを変換する（関数を適用する）
+        /// </summary>
+        /// <param name="arg">変換するデータ</param>
+        /// <param name="func">変換</param>
+        /// <typeparam name="T">変換元のデータの型</typeparam>
+        /// <typeparam name="TR">変換先のデータの型</typeparam>
+        /// <returns>変換されたデータ</returns>
         public static TR Apply<T, TR> (this T arg, Func<T, TR> func) {
             return func (arg);
+        }
+
+        /// <summary>
+        /// データを標準出力に流す（データはそのまま）
+        /// </summary>
+        /// <param name="item">データ</param>
+        /// <typeparam name="T">データの型</typeparam>
+        /// <returns>元のデータ</returns>
+        public static T Trace<T> (this T item) {
+            Print (item);
+            return item;
         }
 
         /// <summary>
@@ -623,7 +679,6 @@ namespace AtCoderTemplate {
     }
 
     public static class MyEnumerable {
-
         /// <summary>
         /// 左閉右開区間 [startIndex,endIndex) を得る
         /// </summary>
