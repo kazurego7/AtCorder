@@ -16,8 +16,20 @@ namespace AtCoderTemplate {
             var N = NK[0];
             var K = NK[1];
             var div = p10_9plus7;
-            var ans = Enumerable.Range (1, Min (K, N - K + 1))
-                .Select (i => (nCk (K - 1, Max (i - 1, K) - i) * nCk (N - K - 1, Max (N - K, i) - (i + 1))) % div);
+            var comb = new long[2000 + 1, 2000 + 1];
+            foreach (var n in MyEnumerable.Interval (0, 2000 + 1)) {
+                foreach (var k in MyEnumerable.Interval (0, 2000 + 1)) {
+                    if (n < k) continue;
+
+                    if (k == 0) {
+                        comb[n, k] = 1;
+                    } else {
+                        comb[n, k] = (comb[n - 1, k - 1] + comb[n - 1, k]) % div;
+                    }
+                }
+            }
+            var ans = Enumerable.Range (1, K)
+                .Select (i => (comb[N - K + 1, i] * comb[K - 1, i - 1]) % div);
             PrintColomn (ans);
         }
     }
