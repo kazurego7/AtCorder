@@ -12,10 +12,19 @@ using static AtCoderTemplate.MyExtensions;
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
-            var LR = ReadLongs ();
+            var LR = ReadInts ();
             var L = LR[0];
             var R = LR[1];
-            PrintIf (R - L >= R % 2019, 0, ((L % 2019) * ((L + 1) % 2019)) % 2019);
+            if (R - L >= 2019) {
+                Print (0);
+            } else {
+                var ans = MyEnumerable.Interval (L, R + 1).SelectMany (i =>
+                    MyEnumerable.Interval (i + 1, R + 1).Select (j =>
+                        ((long) i * j) % 2019
+                    )
+                ).Min ();
+                Print (ans);
+            }
         }
     }
 

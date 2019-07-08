@@ -13,7 +13,12 @@ namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
             var N = ReadInt ();
-            var A = ReadInts ();
+            var A = ReadLongs ();
+
+            var X0 = A.Sum () - 2 * Enumerable.Range (0, (N - 1) / 2).Select (m => A[2 * m + 1]).Sum ();
+            var X = A.SkipLast (1).Scanl (X0, (Xi, Ai) => -Xi + 2 * Ai);
+            PrintRow (X);
+
         }
     }
 
