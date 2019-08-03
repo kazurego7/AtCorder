@@ -12,24 +12,42 @@ using static AtCoderTemplate.MyExtensions;
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
+            /*
+            N以下の整数を数える
+            ただし、0 <= N <= 10^15
+
+            dp[決めた桁数][N未満フラグ]
+            決めた桁数 i    : どこまで処理をしたか、次に考える桁はどこか、部分問題としてi桁以下の問題を解くためのパラメータ
+            N未満フラグ k   : 過去に決定した桁がすべて、Nの対応する桁に等しいとき、S[i]以下にしないといけない(N = 12345 にたいして S = 123??のとき、S[3]=5にするとNを超えてしまう)
+                              逆に、過去に決定した桁のいずれかが、Nの対応する桁に等しくないとき、0以上9以下の好きな数字を入れられる
+            */
+
             var S = Read ();
             var N = S.Length;
-            var p = p10_9plus7;
-            var dp = new long[N, 13];
+            var K = 2;
+            var dp = new long[N + 1, K];
             dp[0, 0] = 1;
-            foreach (var i in Enumerable.Range (1, N)) {
-                var d = (long) (Pow (10, i) % 13);
-                if (S[i] == '?') {
-                    foreach (var m in Enumerable.Range (0, 10)) {
-                        foreach (var k in Enumerable.Range (0, 13)) {
-                            dp[i, ((k * d) % 13 + m) % 13] += dp[i - 1, m];
+            foreach (var i in MyEnumerable.Interval (0, N)) {
+                foreach (var k in MyEnumerable.Interval (0, K)) {
+                    var D = int.Parse (S[i].ToString ());
+                    if (k == 0) {
+                        foreach (var m in MyEnumerable.Interval (0, D + 1)) {
+                            if (m == D) {
+                                dp[i + 1, 0] += dp[i, 0];
+                            } else {
+                                dp[i + 1, 1] += dp[i, 0];
+                            }
+                        }
+                    } else {
+                        foreach (var m in MyEnumerable.Interval (0, 10)) {
+                            dp[i + 1, 1] += dp[i, 1];
                         }
                     }
-                    foreach (var k in Enumerable.Range (0, 13)) {
-                        dp[i, k] %= p;
-                    }
-                } else { }
+                }
             }
+
+            var ans = dp[N, 0] + dp[N, 1];
+            Print (ans);
         }
     }
 
