@@ -27,21 +27,13 @@ namespace AtCoderTemplate {
             var K = 2;
             var dp = new long[N + 1, K];
             dp[0, 0] = 1;
-            foreach (var i in MyEnumerable.Interval (0, N)) {
+            foreach (var i in MyEnumerable.Interval (1, N + 1)) {
                 foreach (var k in MyEnumerable.Interval (0, K)) {
-                    var D = int.Parse (S[i].ToString ());
+                    var D = int.Parse (S[i - 1].ToString ());
                     if (k == 0) {
-                        foreach (var m in MyEnumerable.Interval (0, D + 1)) {
-                            if (m == D) {
-                                dp[i + 1, 0] += dp[i, 0];
-                            } else {
-                                dp[i + 1, 1] += dp[i, 0];
-                            }
-                        }
+                        dp[i, 0] = dp[i - 1, 0];
                     } else {
-                        foreach (var m in MyEnumerable.Interval (0, 10)) {
-                            dp[i + 1, 1] += dp[i, 1];
-                        }
+                        dp[i, 1] = dp[i - 1, 1] * 10 + D;
                     }
                 }
             }
