@@ -14,7 +14,6 @@ namespace AtCoderTemplate {
         public static void Main (string[] args) {
             var S = Read ();
             var N = S.Length;
-
             var LRi = new List<int> ();
             LRi.Add (0);
             foreach (var i in MyEnumerable.Interval (1, N)) {
