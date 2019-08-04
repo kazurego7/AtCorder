@@ -21,6 +21,7 @@ namespace AtCoderTemplate {
                     LRi.Add (i);
                 }
             }
+
             LRi.Add (N);
             var Ss = LRi.MapAdjacent ((i1, i2) => S.Substring (i1, i2 - i1)).ToList ();
             var S2s = new List<IEnumerable<int>> ();
