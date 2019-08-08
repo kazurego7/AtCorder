@@ -8,13 +8,36 @@ using static AtCoderTemplate.MyInputOutputs;
 using static AtCoderTemplate.MyNumericFunctions;
 using static AtCoderTemplate.MyAlgorithm;
 using static AtCoderTemplate.MyExtensions;
+using static AtCoderTemplate.MyEnumerable;
+using static AtCoderTemplate.MyOtherFunctions;
 
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
             var NM = ReadInts ();
+            var N = NM[0];
+            var M = NM[1];
+            var A = ReadInts ();
 
-            // DP力が足りてないのでまた明日
+            var match = new int[] { 2, 5, 5, 4, 5, 6, 3, 7, 6 };
+            var dp = new string[N + 100];
+            var minusInf = "-";
+            foreach (var i in Interval (0, N + 100)) {
+                dp[i] = minusInf;
+            }
+            dp[0] = "";
+            foreach (var i in Interval (0, N + 1)) {
+                if (dp[i] == minusInf) continue;
+                foreach (var a in A) {
+                    var nextLength = dp[i + match[a - 1]].Length;
+                    var nowLength = (dp[i] + $"{a}").Length;
+                    if (nextLength < nowLength || nextLength == nowLength && dp[i + match[a - 1]].CompareTo (dp[i] + $"{a}") < 0) {
+                        dp[i + match[a - 1]] = dp[i] + $"{a}";
+                    }
+                }
+            }
+            Print (dp[N]);
+            // PrintColomn (dp);
         }
     }
 
@@ -161,18 +184,12 @@ namespace AtCoderTemplate {
         public static IEnumerable<char> lowerAlphabets = Enumerable.Range ('a', 'z' - 'a' + 1).Select (i => (char) i);
         public static IEnumerable<char> upperAlphabets = Enumerable.Range ('A', 'Z' - 'A' + 1).Select (i => (char) i);
 
-        public static int p10_9plus7 = (int) Pow (10, 9) + 7;
+        public static int p1000000007 = (int) Pow (10, 9) + 7;
     }
 
     public static class MyNumericFunctions {
-        public static bool IsEven (int a) {
-            return a % 2 == 0;
-        }
         public static bool IsEven (long a) {
             return a % 2 == 0;
-        }
-        public static bool IsOdd (int a) {
-            return !IsEven (a);
         }
         public static bool IsOdd (long a) {
             return !IsEven (a);
@@ -627,13 +644,14 @@ namespace AtCoderTemplate {
         }
 
         /// <summary>
-        /// データを標準出力に流す（データはそのまま）
+        /// データから副作用（出力や破壊的代入など）を生み、データを返す
         /// </summary>
-        /// <param name="item">データ</param>
+        /// <param name="item">元のデータ</param>
+        /// <param name="effect">副作用（出力や破壊的代入など）</param>
         /// <typeparam name="T">データの型</typeparam>
-        /// <returns>元のデータ</returns>
-        public static T Trace<T> (this T item) {
-            Print (item);
+        /// <returns>副作用を起こした後のデータ</returns>
+        public static T Effect<T> (this T item, Action<T> effect) {
+            effect (item);
             return item;
         }
 
@@ -682,6 +700,7 @@ namespace AtCoderTemplate {
             }
             return result;
         }
+
     }
 
     public static class MyEnumerable {
@@ -694,5 +713,38 @@ namespace AtCoderTemplate {
             if (endIndex - startIndex < 0) new ArgumentException ();
             return Enumerable.Range (startIndex, endIndex - startIndex);
         }
+    }
+
+    public static class MyOtherFunctions {
+        /// <summary>
+        /// CutFlagからCutIndexesへの変換
+        /// </summary>
+        /// <param name="flag">CutFlag</param>
+        /// <param name="flagSize">CutFlagのサイズ</param>
+        /// <returns>CutIndex</returns>
+        /// <example> CutFlagToCutIndex(10110, 5) => [0, 2, 3, 5, 6]</example>
+        public static IEnumerable<int> CutFlagToCutIndexes (int flag) {
+            int flagSize = (int) Log (flag, 2);
+            var indexes = new List<int> { 0 };
+            foreach (var i in MyEnumerable.Interval (0, flagSize)) {
+                if ((flag >> i) % 2 == 1) {
+                    indexes.Add (i + 1);
+                }
+            }
+            indexes.Add (flagSize + 1);
+            return indexes;
+        }
+
+        /// <summary>
+        /// CutIndexesで文字列を分割する
+        /// </summary>
+        /// <param name="source">元の文字列</param>
+        /// <param name="cutIndexes">分割する位置</param>
+        /// <returns>分割された文字列</returns>
+        /// <example>CutForIndexes("abcdef", [0, 2, 3, 5, 6]) => ["ab", "c", "de", "f"]</example>
+        public static IEnumerable<string> CutForIndexes (string source, IEnumerable<int> cutIndexes) {
+            return cutIndexes.MapAdjacent ((i0, i1) => source.Substring (i0, i1 - i0));
+        }
+
     }
 }
