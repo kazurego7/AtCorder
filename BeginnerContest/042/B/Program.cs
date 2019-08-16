@@ -13,7 +13,16 @@ using static AtCoderTemplate.MyEnumerable;
 
 namespace AtCoderTemplate {
     public class Program {
-        public static void Main (string[] args) { }
+        public static void Main (string[] args) {
+            var NL = ReadInts ();
+            var N = NL[0];
+            var L = NL[1];
+            var S = ReadColumns (N, 1) [0];
+            var ans = S.OrderBy (x => x)
+                .Apply (String.Concat);
+            Print (ans);
+
+        }
     }
 
     public static class MyInputOutputs {
