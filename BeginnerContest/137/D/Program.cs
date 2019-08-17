@@ -7,9 +7,9 @@ using static AtCoderTemplate.MyConstants;
 using static AtCoderTemplate.MyInputOutputs;
 using static AtCoderTemplate.MyNumericFunctions;
 using static AtCoderTemplate.MyAlgorithm;
+using static AtCoderTemplate.MyDataStructure;
 using static AtCoderTemplate.MyExtensions;
 using static AtCoderTemplate.MyEnumerable;
-using static AtCoderTemplate.MyOtherFunctions;
 
 namespace AtCoderTemplate {
     public class Program {
@@ -20,7 +20,24 @@ namespace AtCoderTemplate {
             var AB = ReadColumns (N, 2);
             var A = AB[0].ToInts ();
             var B = AB[1].ToInts ();
+            var que = new PriorityQueue<int> ((x, y) => (y - x));
+            var afterPays = Interval (0, 100000).Select (_ => new List<int> ()).ToList ();
+            foreach (var i in Interval (0, N)) {
+                afterPays[A[i] - 1].Add (B[i]);
+            }
 
+            var ans = 0L;
+            foreach (var i in Interval (0, M)) {
+                foreach (var afterPay in afterPays[i]) {
+                    que.Enqueue (afterPay);
+                }
+                if (que.Size () == 0) {
+                    continue;
+                } else {
+                    ans += que.Dequeue ();
+                }
+            }
+            Print (ans);
         }
     }
 
@@ -451,7 +468,7 @@ namespace AtCoderTemplate {
         /// 右へのしゃくとり法の形式
         /// </summary>
         /// <param name="n">なめるシーケンスの長さ</param>
-        /// <param name="Predicate">更新のための条件関数。indexの(left,right)をとり、条件を満たすとUpdateConditionを行う</param>
+        /// <param name="Predicate">更新のための条件関数。indexの(left,right)をとり、条件を満たすとUpdateを行う</param>
         /// <param name="initialCondition">初期状態。</param>
         /// <param name="Update">状態更新関数。indexのleft, rightと前のconditionをとり、更新したconditionを返す</param>
         /// <typeparam name="TR"></typeparam>
@@ -536,6 +553,9 @@ namespace AtCoderTemplate {
             return res;
         }
 
+    }
+
+    public static class MyDataStructure {
         public class UnionFind {
             List<int> parent;
             List<int> size;
@@ -573,6 +593,71 @@ namespace AtCoderTemplate {
                 int root_u = Root (u);
                 int root_v = Root (v);
                 return root_u == root_v;
+            }
+        }
+
+        /// <summary>
+        /// Comparison<T>(順序を定める高階関数 t -> t -> Orderingみたいなもの)からIComparer<T>の実体へ変換するクラス
+        /// </summary>
+        /// <typeparam name="T">順序付けられる型</typeparam>
+        public class ComparisonToComparerConverter<T> : IComparer<T> {
+            Comparison<T> comparison;
+            public ComparisonToComparerConverter (Comparison<T> comparison) {
+                this.comparison = comparison;
+            }
+            public int Compare (T x, T y) {
+                return comparison (x, y);
+            }
+        }
+
+        /// <summary>
+        /// 優先度付きキュー
+        /// 先頭参照・要素数がO(1)、要素の追加・先頭削除がO(log N)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public class PriorityQueue<T> where T : IComparable<T> {
+            SortedDictionary<T, Queue<T>> dict;
+            int size = 0;
+
+            public PriorityQueue () {
+                dict = new SortedDictionary<T, Queue<T>> ();
+            }
+
+            public PriorityQueue (IComparer<T> comparer) {
+                dict = new SortedDictionary<T, Queue<T>> (comparer);
+            }
+
+            public PriorityQueue (Comparison<T> comparison) {
+                dict = new SortedDictionary<T, Queue<T>> (new ComparisonToComparerConverter<T> (comparison));
+            }
+
+            public void Enqueue (T item) {
+                if (dict.ContainsKey (item)) {
+                    dict[item].Enqueue (item);
+                } else {
+                    var added = new Queue<T> ();
+                    added.Enqueue (item);
+                    dict.Add (item, added);
+                }
+                size += 1;
+            }
+
+            public T Peek () {
+                return dict.First ().Value.First ();
+            }
+
+            public int Size () {
+                return size;
+            }
+
+            public T Dequeue () {
+                var first = dict.First ();
+                if (first.Value.Count <= 1) {
+                    dict.Remove (first.Key);
+                }
+                size -= 1;
+                return first.Value.Dequeue ();
+
             }
         }
     }
@@ -684,6 +769,46 @@ namespace AtCoderTemplate {
             return result;
         }
 
+        /// <summary>
+        /// 数列の和をdivisorで割った余りを計算する
+        /// </summary>
+        /// <param name="source">数列</param>
+        /// <param name="divisor">割る数</param>
+        /// <returns>数列の和をdivisorで割った余り</returns>
+        public static int Sum (this IEnumerable<int> source, int divisor) {
+            return source.Aggregate (0, (a, b) => (int) (((long) a + b) % divisor));
+        }
+
+        /// <summary>
+        /// 数列の積を計算する
+        /// </summary>
+        /// <param name="source">数列</param>
+        /// <returns>数列の積</returns>
+        public static long Product (this IEnumerable<long> source) {
+            return source.Aggregate (1L, (a, b) => a * b);
+        }
+
+        /// <summary>
+        /// 数列の積をdivisorで割った余りを計算する
+        /// </summary>
+        /// <param name="source">数列</param>
+        /// <param name="divisor">割る数</param>
+        /// <returns>数列の積をdivisorで割った余り</returns>
+        public static int Product (this IEnumerable<int> source, int divisor) {
+            return source.Aggregate (1, (a, b) => (int) (((long) a * b) % divisor));
+        }
+
+        /// <summary>
+        /// indexの列で文字列を分割する
+        /// </summary>
+        /// <param name="source">元の文字列</param>
+        /// <param name="cutIndexes">分割する位置の列</param>
+        /// <returns>分割された文字列</returns>
+        /// <example>CutForIndexes("abcdef", [0, 2, 3, 5, 6]) => ["ab", "c", "de", "f"]</example>
+        public static IEnumerable<string> CutForIndexes (string source, IEnumerable<int> cutIndexes) {
+            return cutIndexes.MapAdjacent ((i0, i1) => source.Substring (i0, i1 - i0));
+        }
+
     }
 
     public static class MyEnumerable {
@@ -696,38 +821,24 @@ namespace AtCoderTemplate {
             if (endIndex - startIndex < 0) new ArgumentException ();
             return Enumerable.Range (startIndex, endIndex - startIndex);
         }
-    }
 
-    public static class MyOtherFunctions {
         /// <summary>
-        /// CutFlagからCutIndexesへの変換
+        /// フラグから分割するindexの位置の列への変換
         /// </summary>
-        /// <param name="flag">CutFlag</param>
-        /// <param name="flagSize">CutFlagのサイズ</param>
-        /// <returns>CutIndex</returns>
+        /// <param name="flags">二進数によるフラグ</param>
+        /// <param name="flagSize">フラグの数</param>
+        /// <returns>分割するindexの位置の列</returns>
         /// <example> CutFlagToCutIndex(10110, 5) => [0, 2, 3, 5, 6]</example>
-        public static IEnumerable<int> CutFlagToCutIndexes (int flag) {
-            int flagSize = (int) Log (flag, 2);
+        public static IEnumerable<int> CutFlagToIndexes (int flags) {
+            int flagSize = (int) Log (flags, 2);
             var indexes = new List<int> { 0 };
             foreach (var i in MyEnumerable.Interval (0, flagSize)) {
-                if ((flag >> i) % 2 == 1) {
+                if ((flags >> i) % 2 == 1) {
                     indexes.Add (i + 1);
                 }
             }
             indexes.Add (flagSize + 1);
             return indexes;
         }
-
-        /// <summary>
-        /// CutIndexesで文字列を分割する
-        /// </summary>
-        /// <param name="source">元の文字列</param>
-        /// <param name="cutIndexes">分割する位置</param>
-        /// <returns>分割された文字列</returns>
-        /// <example>CutForIndexes("abcdef", [0, 2, 3, 5, 6]) => ["ab", "c", "de", "f"]</example>
-        public static IEnumerable<string> CutForIndexes (string source, IEnumerable<int> cutIndexes) {
-            return cutIndexes.MapAdjacent ((i0, i1) => source.Substring (i0, i1 - i0));
-        }
-
     }
 }
