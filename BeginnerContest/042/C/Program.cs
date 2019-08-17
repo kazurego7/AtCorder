@@ -19,15 +19,10 @@ namespace AtCoderTemplate {
             var K = NK[1];
             var D = ReadInts ();
             var strN = $"{N}";
-            var likes = Interval (0, 10).Where (i => D.Any (Di => Di == i)).Select (i => (char) ('0' + i));
-            var ans = "";
-            foreach (var i in Interval (0, strN.Length)) {
-                if (likes.Any (di => di == strN[i])) {
-                    ans += strN[i];
-                } else {
-
-                }
-            }
+            var L = Interval (0, 10).Where (i => !D.Any (Di => Di == i)).Select (i => (char) ('0' + i));
+            // PrintRow (L);
+            var ans = Interval (1, 100000).Where (i => N <= i && i.ToString ().All (si => L.Any (Li => Li == si))).Min ();
+            Print (ans);
         }
     }
 
