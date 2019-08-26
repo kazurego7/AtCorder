@@ -15,8 +15,28 @@ using static AtCoderTemplate.MyEnumerable;
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
-            var n = ReadInt ();
-            var a = ReadInts ();
+            var A = Read ();
+            var B = Read ();
+
+            var gt = "GREATER";
+            var ls = "LESS";
+            var eq = "EQUAL";
+            var ans = "";
+            if (A.Length < B.Length) {
+                ans = ls;
+            } else if (A.Length > B.Length) {
+                ans = gt;
+            } else {
+                if (String.Compare (A, B) < 0) {
+                    ans = ls;
+                } else if (String.Compare (A, B) > 0) {
+                    ans = gt;
+                } else {
+                    ans = eq;
+                }
+            }
+
+            Print (ans);
 
         }
     }
