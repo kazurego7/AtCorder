@@ -16,16 +16,24 @@ namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
             var N = ReadInt ();
-            var A = ReadInts ();
-            var B = ReadInts ();
-            var sortedIxs = Interval (0, N).OrderBy (i => B[i]);
-            var A2 = sortedIxs.Select (i => A[i]).ToList ();
-            var C = A.OrderBy (Ai => Ai).ToList ();
-            var B2 = B.OrderBy (Bi => Bi).ToList ();
-            var isOK = Interval (0, N).All (i => C[i] >= B2[i]);
-            var count = Interval (0, N).Count (i => A2[i] != C[i]);
+            var A = ReadLongs ();
+            var B = ReadLongs ();
 
-            PrintIf (isOK, count, -1);
+            var S = Interval (0, N)
+                .Where (i => A[i] < B[i])
+                .Sum (i => B[i] - A[i]);
+            var Scount = Interval (0, N)
+                .Count (i => A[i] < B[i]);
+            var dS = Interval (0, N)
+                .Where (i => A[i] >= B[i])
+                .Select (i => A[i] - B[i])
+                .OrderByDescending (d => d)
+                .Scanl (0L, (accm, d) => accm + d)
+                .Append (long.MaxValue)
+                .ToList ();
+            var count = Interval (0, dS.Count)
+                .First (i => dS[i] >= S);
+            PrintIf (count == dS.Count - 1, -1, count + Scount);
         }
     }
 
