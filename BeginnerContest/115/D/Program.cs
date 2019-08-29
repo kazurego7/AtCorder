@@ -15,10 +15,39 @@ using static AtCoderTemplate.MyEnumerable;
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
-            var NX = ReadInts ();
-            var N = NX[0];
-            var X = NX[1];
+            var NX = Reads ();
+            var N = NX[0].ToInt ();
+            var X = NX[1].ToLong ();
 
+            var S = Interval (1, N + 1).Scanl (1L, (Si, _) => 2 * Si + 3).ToList ();
+            var P = Interval (1, N + 1).Scanl (1L, (Pi, _) => 2 * Pi + 1).ToList ();
+            var ans = 0L;
+            var rest = X;
+            foreach (var i in Interval (0, N + 1).Reverse ()) {
+                // Print (i);
+                if (i == 0) {
+                    ans += 1;
+                    break;
+                } else if (rest - (2 * S[i - 1] + 3) == 0) {
+                    ans += 2 * P[i - 1] + 1;
+                    break;
+                } else if (rest - (S[i - 1] + 2) > 0) {
+                    ans += P[i - 1] + 1;
+                    rest -= S[i - 1] + 2;
+                    continue;
+                } else if (rest - (S[i - 1] + 2) == 0) {
+                    ans += P[i - 1] + 1;
+                    break;
+                } else if (rest - 1 > 0) {
+                    rest -= 1;
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            // PrintRow (S);
+            // PrintRow (P);
+            Print (ans);
         }
     }
 
