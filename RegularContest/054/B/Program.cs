@@ -16,8 +16,23 @@ namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
             var P = double.Parse (Read ());
-            var ans = Interval (0, 90 + 1).Select (x => x + P / Pow (2, x / 1.5)).Min ();
-            Print (ans);
+            Func<double, double> f = x => x + P / Pow (2, x / 1.5);
+            var e = Pow (10, -8);
+            var t = TernarySerch (0, P, f, e);
+            Print (f (t));
+        }
+
+        public static double TernarySerch (double l, double r, Func<double, double> f, double allowableError) {
+            while (r - l >= allowableError) {
+                var t1 = l + (r - l) / 3;
+                var t2 = l + (r - l) / 3 * 2.0;
+                if (f (t1) < f (t2)) {
+                    r = t2;
+                } else {
+                    l = t1;
+                }
+            }
+            return l;
         }
     }
 
@@ -33,47 +48,47 @@ namespace AtCoderTemplate {
 
         public static List<List<string>> ReadRows (int rowNum) {
             /*
-            入力例
-            A1 B1 C1 ... Z1
-            A2 B2 C2 ... Z2
-            ...
-            An Bn Cn ... Zn
-           
+                入力例
+                A1 B1 C1 ... Z1
+                A2 B2 C2 ... Z2
+                ...
+                An Bn Cn ... Zn
+               
 
-            出力例
-            [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
-            */
+                出力例
+                [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
+                */
             return Enumerable.Range (0, rowNum).Select (i => Reads ()).ToList ();
         }
 
         public static List<List<string>> ReadColumns (int rowNum, int colNum) {
             /*
-            入力例
-            A1 B1 C1 ... Z1
-            A2 B2 C2 ... Z2
-            ...
-            An Bn Cn ... Zn
-           
+                入力例
+                A1 B1 C1 ... Z1
+                A2 B2 C2 ... Z2
+                ...
+                An Bn Cn ... Zn
+               
 
-            出力例
-            [[A1, A2, A3, ... An], [B1, B2, B3, ... Bn], ... [Z1, Z2, Z3, ... Zn]]
-            */
+                出力例
+                [[A1, A2, A3, ... An], [B1, B2, B3, ... Bn], ... [Z1, Z2, Z3, ... Zn]]
+                */
             var rows = ReadRows (rowNum);
             return Enumerable.Range (0, colNum).Select (i => rows.Select (items => items[i].ToString ()).ToList ()).ToList ();
         }
 
         public static List<List<string>> ReadGridGraph (int height, int width) {
             /*
-            入力例
-            A1B1C1...Z1
-            A2B2C2...Z2
-            ...
-            AnBnCn...Zn
-           
+                入力例
+                A1B1C1...Z1
+                A2B2C2...Z2
+                ...
+                AnBnCn...Zn
+               
 
-            出力例
-            [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
-            */
+                出力例
+                [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
+                */
             return Enumerable.Range (0, height)
                 .Select (i =>
                     Read ()
