@@ -14,7 +14,22 @@ using static AtCoderTemplate.MyEnumerable;
 
 namespace AtCoderTemplate {
     public class Program {
-        public static void Main (string[] args) { }
+        public static void Main (string[] args) {
+            var N = ReadInt ();
+            var H = ReadInts ();
+
+            var dp = new int[N];
+            dp[N - 1] = 0;
+            foreach (var i in Interval (0, N - 1).Reverse ()) {
+                if (H[i + 1] <= H[i]) {
+                    dp[i] = dp[i + 1] + 1;
+                } else {
+                    dp[i] = 0;
+                }
+            }
+            var ans = dp.Max ();
+            Print (ans);
+        }
     }
 
     public static class MyInputOutputs {

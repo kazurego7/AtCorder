@@ -14,7 +14,11 @@ using static AtCoderTemplate.MyEnumerable;
 
 namespace AtCoderTemplate {
     public class Program {
-        public static void Main (string[] args) { }
+        public static void Main (string[] args) {
+            var N = ReadInt ();
+            var ans = (long) (N - 1) * N / 2;
+            Print (ans);
+        }
     }
 
     public static class MyInputOutputs {
