@@ -15,10 +15,18 @@ using static AtCoderTemplate.MyEnumerable;
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
-            var HWK = ReadInts ();
-            var H = HWK[0];
-            var W = HWK[1];
-            var K = HWK[2];
+            var N = ReadInt ();
+            var a = ReadInts ();
+            var dp = new long[N];
+            dp[0] = 0;
+            dp[1] = Abs (a[0] - a[1]);
+            foreach (var i in Interval (2, N)) {
+                dp[i] = Min (dp[i - 1] + Abs (a[i] - a[i - 1]), dp[i - 2] + Abs (a[i] - a[i - 2]));
+            }
+
+            var ans = dp[N - 1];
+
+            Print (ans);
 
         }
     }

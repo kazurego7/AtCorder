@@ -14,13 +14,7 @@ using static AtCoderTemplate.MyEnumerable;
 
 namespace AtCoderTemplate {
     public class Program {
-        public static void Main (string[] args) {
-            var HWK = ReadInts ();
-            var H = HWK[0];
-            var W = HWK[1];
-            var K = HWK[2];
-
-        }
+        public static void Main (string[] args) { }
     }
 
     public static class MyInputOutputs {
