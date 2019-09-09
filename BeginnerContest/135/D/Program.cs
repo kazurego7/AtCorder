@@ -12,24 +12,32 @@ using static AtCoderTemplate.MyExtensions;
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
-            var S = Read ();
+            var S = String.Concat (Read ().Reverse ());
             var N = S.Length;
             var p = p10_9plus7;
-            var dp = new long[N, 13];
+            var dp = new long[N + 1, 13];
             dp[0, 0] = 1;
-            foreach (var i in Enumerable.Range (1, N)) {
-                var d = (long) (Pow (10, i) % 13);
+            var d = 1;
+            foreach (var i in MyEnumerable.Interval (0, N)) {
                 if (S[i] == '?') {
                     foreach (var m in Enumerable.Range (0, 10)) {
                         foreach (var k in Enumerable.Range (0, 13)) {
-                            dp[i, ((k * d) % 13 + m) % 13] += dp[i - 1, m];
+                            dp[i + 1, (m * d + k) % 13] += dp[i, k];
+                            dp[i + 1, (m * d + k) % 13] %= p;
                         }
                     }
+                } else {
+                    var m = int.Parse (S[i].ToString ());
                     foreach (var k in Enumerable.Range (0, 13)) {
-                        dp[i, k] %= p;
+                        dp[i + 1, (m * d + k) % 13] += dp[i, k];
+                        dp[i + 1, (m * d + k) % 13] %= p;
                     }
-                } else { }
+                }
+                d *= 10;
+                d %= 13;
             }
+            var ans = dp[N, 5];
+            Print (ans);
         }
     }
 
@@ -45,47 +53,47 @@ namespace AtCoderTemplate {
 
         public static List<List<string>> ReadRows (int rowNum) {
             /*
-            入力例
-            A1 B1 C1 ... Z1
-            A2 B2 C2 ... Z2
-            ...
-            An Bn Cn ... Zn
-           
+                入力例
+                A1 B1 C1 ... Z1
+                A2 B2 C2 ... Z2
+                ...
+                An Bn Cn ... Zn
+               
 
-            出力例
-            [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
-            */
+                出力例
+                [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
+                */
             return Enumerable.Range (0, rowNum).Select (i => Reads ()).ToList ();
         }
 
         public static List<List<string>> ReadColumns (int rowNum, int colNum) {
             /*
-            入力例
-            A1 B1 C1 ... Z1
-            A2 B2 C2 ... Z2
-            ...
-            An Bn Cn ... Zn
-           
+                入力例
+                A1 B1 C1 ... Z1
+                A2 B2 C2 ... Z2
+                ...
+                An Bn Cn ... Zn
+               
 
-            出力例
-            [[A1, A2, A3, ... An], [B1, B2, B3, ... Bn], ... [Z1, Z2, Z3, ... Zn]]
-            */
+                出力例
+                [[A1, A2, A3, ... An], [B1, B2, B3, ... Bn], ... [Z1, Z2, Z3, ... Zn]]
+                */
             var rows = ReadRows (rowNum);
             return Enumerable.Range (0, colNum).Select (i => rows.Select (items => items[i].ToString ()).ToList ()).ToList ();
         }
 
         public static List<List<string>> ReadGridGraph (int height, int width) {
             /*
-            入力例
-            A1B1C1...Z1
-            A2B2C2...Z2
-            ...
-            AnBnCn...Zn
-           
+                入力例
+                A1B1C1...Z1
+                A2B2C2...Z2
+                ...
+                AnBnCn...Zn
+               
 
-            出力例
-            [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
-            */
+                出力例
+                [[A1, B1, C1, ... Z1], [A2, B2, C2, ... Z2], ... [An, Bn, Cn, ... Zn]]
+                */
             return Enumerable.Range (0, height)
                 .Select (i =>
                     Read ()
