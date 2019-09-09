@@ -21,23 +21,8 @@ namespace AtCoderTemplate {
             var S = Read ();
             var rle = RunLengthEncoding (S);
             var original = rle.Select (t => t.Item2 - 1).Sum ();
-
-            var added = 0;
-            if (IsOdd (rle.Count ())) {
-                if ((rle.Count () - 1) / 2 < K) {
-                    added = (rle.Count () - 1) / 2 * 2;
-                } else {
-                    added = K * 2;
-                }
-            } else {
-                if (rle.Count () / 2 <= K) {
-                    added = (rle.Count () - 2) / 2 * 2 + 1;
-                } else {
-                    added = K * 2;
-                }
-            }
-
-            Print (original + added);
+            var ans = Min (N - 1, original + 2 * K);
+            Print (ans);
         }
     }
 
