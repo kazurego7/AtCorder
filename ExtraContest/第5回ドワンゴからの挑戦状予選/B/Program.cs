@@ -18,14 +18,20 @@ namespace AtCoderTemplate {
             var NK = ReadInts ();
             var N = NK[0];
             var K = NK[1];
-            var a = ReadInts ();
-            var f = Interval (0, N).Scanl1 ((accm, i) => accm & a[i]).ToList ();
-            var ands = Interval (0, N - 1).SelectMany (l =>
-                Interval (l + 1, N).Select (r =>
-                    (long) (f[r] - f[l])
+            var a = ReadLongs ();
+            var aSum = a.Scanl (0L, (accm, ai) => accm + ai).ToList ();
+            var A = Interval (0, N).SelectMany (i =>
+                Interval (i + 1, N + 1).Select (k =>
+                    aSum[k] - aSum[i]
                 )
-            );
-            var ans = ands.OrderByDescending (x => x).Take (K).Sum ();
+            ).ToList ();
+            var ans = 0L;
+            foreach (var i in Interval (0, 40).Reverse ()) {
+                var x = ((ans >> i) | 1) << i;
+                if (A.Where (Ai => (x & Ai) == x).Count () >= K) {
+                    ans = x;
+                }
+            }
             Print (ans);
         }
     }
