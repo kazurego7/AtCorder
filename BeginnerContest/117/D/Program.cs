@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,44 +8,46 @@ using static AtCoderTemplate.MyConstants;
 using static AtCoderTemplate.MyInputOutputs;
 using static AtCoderTemplate.MyNumericFunctions;
 using static AtCoderTemplate.MyAlgorithm;
+using static AtCoderTemplate.MyDataStructure;
 using static AtCoderTemplate.MyExtensions;
 using static AtCoderTemplate.MyEnumerable;
-using static AtCoderTemplate.MyOtherFunctions;
 
 namespace AtCoderTemplate {
     public class Program {
         public static void Main (string[] args) {
-            var NK = ReadLongs ();
-            var N = NK[0];
-            var K = Convert.ToString (NK[1], 2).PadLeft (40, '0');
-            var A = ReadLongs ().Select (Ai => Convert.ToString (Ai, 2).PadLeft (40, '0'));
-            var count0s = Interval (0, 40).Select (i => A.Count (Ak => Ak[i] == '0')).ToList ();
-            var count1s = Interval (0, 40).Select (i => A.Count (Ak => Ak[i] == '1')).ToList ();
-            // PrintRow (A);
-            var ans = solve (count0s, count1s, N, K, A, 0, true, 0);
-            Print (ans);
-        }
+            var NK = Reads ();
+            var N = NK[0].ToInt ();
+            var K = NK[1].ToLong ();
+            var A = ReadLongs ();
 
-        public static long solve (List<int> count0s, List<int> count1s, long N, string K, IEnumerable<string> A, int i, bool flag, long ans) {
-            if (i == 40) {
-                return ans;
-            } else {
-                // Print (ans);
-                var count0 = count0s[i];
-                var count1 = count1s[i];
-                if (K[i] == '0') {
-                    if (flag) {
-                        return solve (count0s, count1s, N, K, A, i + 1, true, ans + count1 * (long) Pow (2, 40 - 1 - i));
+            var Acount1s = Interval (0, 40).Select (i => A.Where (Ak => (Ak >> i) % 2 == 1).Count ()).ToList ();
+
+            var X = 0L;
+            var maxFlag = true;
+            foreach (var i in Interval (0, 40).Reverse ()) {
+                var Ki = (K >> i) % 2;
+                if (maxFlag) {
+                    if (Ki == 1) {
+                        if (Acount1s[i] > N - Acount1s[i]) {
+                            X = X << 1;
+                            maxFlag = false;
+                        } else {
+                            X = (X << 1) + 1;
+                        }
                     } else {
-                        return solve (count0s, count1s, N, K, A, i + 1, false, ans + Max (count0, count1) * (long) Pow (2, 40 - 1 - i));
+                        X = X << 1;
                     }
                 } else {
-                    var one = solve (count0s, count1s, N, K, A, i + 1, true, ans + count0 * (long) Pow (2, 40 - 1 - i));
-                    var zero = solve (count0s, count1s, N, K, A, i + 1, false, ans + count1 * (long) Pow (2, 40 - 1 - i));
-                    return Max (one, zero);
+                    if (Acount1s[i] > N - Acount1s[i]) {
+                        X = X << 1;
+                    } else {
+                        X = (X << 1) + 1;
+                    }
                 }
             }
 
+            var fX = A.Select (Ai => X ^ Ai).Sum ();
+            Print (fX);
         }
     }
 
@@ -349,20 +352,59 @@ namespace AtCoderTemplate {
         }
 
         /// <summary>
-        /// nまでの素数を得る
+        /// 試し割り法 O(N√N)
         /// </summary>
         /// <param name="n">n > 1</param>
         /// <returns></returns>
-        public static IEnumerable<int> Prime (int n) {
+        public static IEnumerable<int> TrialDivision (int n) {
             if (!(n > 1)) throw new ArgumentOutOfRangeException ();
 
             var primes = new List<int> ();
             foreach (var i in Enumerable.Range (2, n - 1)) {
-                if (primes.All (p => i % p != 0)) {
+                if (primes.TakeWhile (p => p <= Sqrt (i)).All (p => i % p != 0)) {
                     primes.Add (i);
                 }
             }
             return primes;
+        }
+
+        /// <summary>
+        /// エラトステネスの篩 O(N loglog N)
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static IEnumerable<int> SieveOfEratosthenes (int n) {
+            if (!(n > 1)) throw new ArgumentOutOfRangeException ();
+
+            var ps = Interval (2, n + 1);
+            while (!ps.IsEmpty () && ps.First () <= Sqrt (n)) {
+                var m = ps.First ();
+                ps = ps.Where (p => p % m != 0);
+            }
+            return ps;
+        }
+
+        /// <summary>
+        /// 素因数分解 O(N loglog N)
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static IEnumerable<int> PrimeFactrization (int n) {
+            if (!(n > 1)) throw new ArgumentOutOfRangeException ();
+
+            var e = new int[n + 1];
+            var p = n;
+            var ps = SieveOfEratosthenes (n).ToList ();
+            var i = 0;
+            while (p != 1) {
+                if (p % ps[i] == 0) {
+                    e[ps[i]] += 1;
+                    p /= ps[i];
+                    continue;
+                }
+                i += 1;
+            }
+            return e;
         }
 
         /// <summary>
@@ -475,7 +517,7 @@ namespace AtCoderTemplate {
         /// 右へのしゃくとり法の形式
         /// </summary>
         /// <param name="n">なめるシーケンスの長さ</param>
-        /// <param name="Predicate">更新のための条件関数。indexの(left,right)をとり、条件を満たすとUpdateConditionを行う</param>
+        /// <param name="Predicate">更新のための条件関数。indexの(left,right)をとり、条件を満たすとUpdateを行う</param>
         /// <param name="initialCondition">初期状態。</param>
         /// <param name="Update">状態更新関数。indexのleft, rightと前のconditionをとり、更新したconditionを返す</param>
         /// <typeparam name="TR"></typeparam>
@@ -494,6 +536,95 @@ namespace AtCoderTemplate {
                 }
             }
             return condition;
+        }
+
+        public static void TreeBFS (
+            int nodeCount,
+            IEnumerable<int> initialNodes,
+            Func<int, IEnumerable<int>> getChilds,
+            Predicate<int> continuePred,
+            Action<int, int> updateItem) {
+
+            var que = new Queue<int> ();
+            var visited = new bool[nodeCount];
+            foreach (var node in initialNodes) {
+                que.Enqueue (node);
+                visited[node] = true;
+            }
+
+            while (!que.IsEmpty ()) {
+                var parent = que.Dequeue ();
+                foreach (var child in getChilds (parent)) {
+                    if (visited[child] || continuePred (child)) continue;
+                    updateItem (parent, child);
+                    que.Enqueue (child);
+                    visited[child] = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// indexの列で文字列を分割する
+        /// </summary>
+        /// <param name="source">元の文字列</param>
+        /// <param name="cutIndexes">分割する位置の列</param>
+        /// <returns>分割された文字列</returns>
+        /// <example>CutForIndexes("abcdef", [0, 2, 3, 5, 6]) => ["ab", "c", "de", "f"]</example>
+        public static IEnumerable<string> CutForIndexes (string source, IEnumerable<int> cutIndexes) {
+            return cutIndexes.MapAdjacent ((i0, i1) => source.Substring (i0, i1 - i0));
+        }
+
+        /// <summary>
+        /// ランレングス符号化
+        /// </summary>
+        /// <param name="source">元の文字列</param>
+        /// <returns>それぞれ連続した文字をひとまとめにし、その文字と長さのペアの列を得る</returns>
+        /// <example>RunLengthEncoding("aaabccdddd") => [(a,3), (b,1), (c,2), (d,4)]</example>
+        public static IEnumerable<Tuple<string, int>> RunLengthEncoding (string source) {
+            var cutIndexes = Interval (1, source.Length)
+                .Where (i => source[i] != source[i - 1])
+                .Prepend (0)
+                .Append (source.Length);
+            return cutIndexes
+                .MapAdjacent ((i0, i1) => Tuple.Create<string, int> (source[i0].ToString (), i1 - i0));
+        }
+
+        /// <summary>
+        /// 3分探索法 O(log N)
+        /// </summary>
+        /// <param name="l">定義域の最小値</param>
+        /// <param name="r">定義域の最大値</param>
+        /// <param name="f">凸な関数</param>
+        /// <param name="allowableError">許容誤差</param>
+        /// <param name="isDownwardConvex">下に凸か（falseならば上に凸）</param>
+        /// <returns>凸関数f(x)の許容誤差を含む極値への元を得る</returns>
+        public static double TernarySerch (double l, double r, Func<double, double> f, double allowableError, bool isDownwardConvex) {
+            while (r - l >= allowableError) {
+                var ml = l + (r - l) / 3; // mid left
+                var mr = l + (r - l) / 3 * 2.0; // mid right
+                var fml = f (ml);
+                var fmr = f (mr);
+                if (isDownwardConvex) {
+                    if (fml < fmr) {
+                        r = mr;
+                    } else if (fml > fmr) {
+                        l = ml;
+                    } else {
+                        l = ml;
+                        r = mr;
+                    }
+                } else {
+                    if (fml < fmr) {
+                        l = ml;
+                    } else if (fml > fmr) {
+                        r = mr;
+                    } else {
+                        l = ml;
+                        r = mr;
+                    }
+                }
+            }
+            return l;
         }
 
         /// <summary>
@@ -560,6 +691,9 @@ namespace AtCoderTemplate {
             return res;
         }
 
+    }
+
+    public static class MyDataStructure {
         public class UnionFind {
             List<int> parent;
             List<int> size;
@@ -599,6 +733,90 @@ namespace AtCoderTemplate {
                 return root_u == root_v;
             }
         }
+
+        /// <summary>
+        /// Comparison<T>(順序を定める高階関数 t -> t -> Orderingみたいなもの)からIComparer<T>の実体へ変換するクラス
+        /// </summary>
+        /// <typeparam name="T">順序付けられる型</typeparam>
+        public class ComparisonToComparerConverter<T> : IComparer<T> {
+            Comparison<T> comparison;
+            public ComparisonToComparerConverter (Comparison<T> comparison) {
+                this.comparison = comparison;
+            }
+            public int Compare (T x, T y) {
+                return comparison (x, y);
+            }
+        }
+
+        /// <summary>
+        /// IComparble<T>を持つ型Tから、その逆順序であるComparison<T>を得る
+        /// </summary>
+        /// <typeparam name="T">順序付きの型</typeparam>
+        /// <returns>IComparable<T>の逆順序</returns>
+        public static Comparison<T> ReverseOrder<T> () where T : IComparable<T> {
+            return (x, y) => -x.CompareTo (y);
+        }
+
+        /// <summary>
+        /// 優先度付きキュー(デフォルトでは昇順)
+        /// 先頭参照・要素数がO(1)、要素の追加・先頭削除がO(log N)
+        /// </summary>
+        /// <typeparam name="T">順序付きの型</typeparam>
+        public class PriorityQueue<T> : IEnumerable<IEnumerable<T>>
+            where T : IComparable<T> {
+                SortedDictionary<T, Queue<T>> dict;
+                int size = 0;
+
+                public PriorityQueue () {
+                    dict = new SortedDictionary<T, Queue<T>> ();
+                }
+
+                public PriorityQueue (IComparer<T> comparer) {
+                    dict = new SortedDictionary<T, Queue<T>> (comparer);
+                }
+
+                public PriorityQueue (Comparison<T> comparison) {
+                    dict = new SortedDictionary<T, Queue<T>> (new ComparisonToComparerConverter<T> (comparison));
+                }
+
+                public void Enqueue (T item) {
+                    if (dict.ContainsKey (item)) {
+                        dict[item].Enqueue (item);
+                    } else {
+                        var added = new Queue<T> ();
+                        added.Enqueue (item);
+                        dict.Add (item, added);
+                    }
+                    size += 1;
+                }
+
+                public T Peek () {
+                    return dict.First ().Value.First ();
+                }
+
+                public int Size () {
+                    return size;
+                }
+
+                public T Dequeue () {
+                    var first = dict.First ();
+                    if (first.Value.Count <= 1) {
+                        dict.Remove (first.Key);
+                    }
+                    size -= 1;
+                    return first.Value.Dequeue ();
+                }
+
+                public IEnumerator<IEnumerable<T>> GetEnumerator () {
+                    foreach (var kv in dict) {
+                        yield return kv.Value;
+                    }
+                }
+
+                IEnumerator IEnumerable.GetEnumerator () {
+                    return GetEnumerator ();
+                }
+            }
     }
 
     public static class MyExtensions {
@@ -708,6 +926,35 @@ namespace AtCoderTemplate {
             return result;
         }
 
+        /// <summary>
+        /// 数列の和をdivisorで割った余りを計算する
+        /// </summary>
+        /// <param name="source">数列</param>
+        /// <param name="divisor">割る数</param>
+        /// <returns>数列の和をdivisorで割った余り</returns>
+        public static int Sum (this IEnumerable<int> source, int divisor) {
+            return source.Aggregate (0, (a, b) => (int) (((long) a + b) % divisor));
+        }
+
+        /// <summary>
+        /// 数列の積を計算する
+        /// </summary>
+        /// <param name="source">数列</param>
+        /// <returns>数列の積</returns>
+        public static long Product (this IEnumerable<long> source) {
+            return source.Aggregate (1L, (a, b) => a * b);
+        }
+
+        /// <summary>
+        /// 数列の積をdivisorで割った余りを計算する
+        /// </summary>
+        /// <param name="source">数列</param>
+        /// <param name="divisor">割る数</param>
+        /// <returns>数列の積をdivisorで割った余り</returns>
+        public static int Product (this IEnumerable<int> source, int divisor) {
+            return source.Aggregate (1, (a, b) => (int) (((long) a * b) % divisor));
+        }
+
     }
 
     public static class MyEnumerable {
@@ -720,38 +967,24 @@ namespace AtCoderTemplate {
             if (endIndex - startIndex < 0) new ArgumentException ();
             return Enumerable.Range (startIndex, endIndex - startIndex);
         }
-    }
 
-    public static class MyOtherFunctions {
         /// <summary>
-        /// CutFlagからCutIndexesへの変換
+        /// フラグから分割するindexの位置の列への変換
         /// </summary>
-        /// <param name="flag">CutFlag</param>
-        /// <param name="flagSize">CutFlagのサイズ</param>
-        /// <returns>CutIndex</returns>
-        /// <example> CutFlagToCutIndex(10110, 5) => [0, 2, 3, 5, 6]</example>
-        public static IEnumerable<int> CutFlagToCutIndexes (int flag) {
-            int flagSize = (int) Log (flag, 2);
+        /// <param name="flags">二進数によるフラグ</param>
+        /// <param name="flagSize">フラグの数</param>
+        /// <returns>分割するindexの位置の列</returns>
+        /// <example> CutFlagToCutIndex(10110) => [0, 2, 3, 5, 6]</example>
+        public static IEnumerable<int> CutFlagToIndexes (int flags) {
+            int flagSize = (int) Log (flags, 2);
             var indexes = new List<int> { 0 };
             foreach (var i in MyEnumerable.Interval (0, flagSize)) {
-                if ((flag >> i) % 2 == 1) {
+                if ((flags >> i) % 2 == 1) {
                     indexes.Add (i + 1);
                 }
             }
             indexes.Add (flagSize + 1);
             return indexes;
         }
-
-        /// <summary>
-        /// CutIndexesで文字列を分割する
-        /// </summary>
-        /// <param name="source">元の文字列</param>
-        /// <param name="cutIndexes">分割する位置</param>
-        /// <returns>分割された文字列</returns>
-        /// <example>CutForIndexes("abcdef", [0, 2, 3, 5, 6]) => ["ab", "c", "de", "f"]</example>
-        public static IEnumerable<string> CutForIndexes (string source, IEnumerable<int> cutIndexes) {
-            return cutIndexes.MapAdjacent ((i0, i1) => source.Substring (i0, i1 - i0));
-        }
-
     }
 }
