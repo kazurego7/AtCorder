@@ -20,6 +20,28 @@ namespace AtCoderTemplate {
             var W = HWK[1];
             var K = HWK[2];
             var p = p1000000007;
+
+            var dp = new long[H + 1, W];
+            dp[0, 0] = 1;
+            foreach (var h in Interval (0, H)) {
+                foreach (var b in Interval (0, 1 << (W - 1))) {
+                    if (Interval (0, Max (W - 2, 0)).Any (i => (b >> i) % 2 == 1 && (b >> (i + 1)) % 2 == 1)) continue;
+
+                    var next = Interval (0, W).ToList ();
+                    foreach (var i in Interval (0, W - 1)) {
+                        if ((b >> i & 1) == 1) {
+                            var swaped = next[i];
+                            next[i] = next[i + 1];
+                            next[i + 1] = swaped;
+                        }
+                    }
+                    foreach (var w in Interval (0, W)) {
+                        dp[h + 1, next[w]] += dp[h, w];
+                        dp[h + 1, next[w]] %= p;
+                    }
+                }
+            }
+            Print (dp[H, K - 1]);
         }
     }
 
